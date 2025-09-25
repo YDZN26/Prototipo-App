@@ -1,0 +1,105 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Nueva Venta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="nueva-venta-content">
+  <div class="form-container">
+    <!-- Fecha de la venta -->
+    <div class="input-group">
+      <ion-label class="input-label">Fecha de la Venta:</ion-label>
+      <ion-button
+        fill="outline"
+        class="date-button"
+        id="fecha-trigger">
+        {{ fechaVenta }}
+      </ion-button>
+    </div>
+
+    <!-- Cliente -->
+    <div class="input-group">
+      <ion-label class="input-label">Cliente:</ion-label>
+      <ion-select
+        placeholder="Selecciona un Cliente"
+        [(ngModel)]="venta.clienteId"
+        class="custom-select"
+        interface="popover">
+        <ion-select-option *ngFor="let cliente of clientes" [value]="cliente.id">
+          {{ cliente.nombre }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+
+    <!-- Método de Pago -->
+    <div class="input-group">
+      <ion-label class="input-label">Método de Pago</ion-label>
+      <div class="payment-methods">
+        <ion-button
+          *ngFor="let metodo of metodosPago"
+          [fill]="venta.metodoPago === metodo.id ? 'solid' : 'outline'"
+          [color]="venta.metodoPago === metodo.id ? 'primary' : 'medium'"
+          class="payment-button"
+          (click)="seleccionarMetodoPago(metodo.id)">
+          <ion-icon [name]="metodo.icono" slot="start"></ion-icon>
+          {{ metodo.nombre }}
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Concepto de la Venta -->
+    <div class="input-group">
+      <ion-label class="input-label">Concepto de la Venta</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="conceptoVenta"
+        readonly
+        class="custom-input concepto-input">
+      </ion-input>
+    </div>
+
+    <!-- Total a Cobrar -->
+    <div class="input-group">
+      <ion-label class="input-label">Total a Cobrar:</ion-label>
+      <div class="total-amount">{{ venta.total }} Bs.</div>
+    </div>
+
+    <!-- Botón Finalizar Venta -->
+    <div class="crear-venta-container">
+      <ion-button
+        expand="block"
+        class="crear-venta-button"
+        (click)="finalizarVenta()"
+        [disabled]="!puedeCrearVenta()">
+        Finalizar Venta
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Modal para seleccionar fecha -->
+<ion-modal #modalFecha trigger="fecha-trigger">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar style="--background: #001E87; --color: white;">
+        <ion-title>Seleccionar Fecha</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="modalFecha.dismiss()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="calendar-modal-dark">
+      <ion-datetime
+        presentation="date"
+        [value]="fechaVentaISO"
+        (ionChange)="cambiarFecha($event); modalFecha.dismiss();"
+        class="calendar-datetime-dark">
+      </ion-datetime>
+    </ion-content>
+  </ng-template>
+</ion-modal>

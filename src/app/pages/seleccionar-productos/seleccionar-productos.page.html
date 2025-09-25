@@ -1,0 +1,65 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Seleccionar Productos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="seleccionar-productos-content">
+  <!-- Total de referencias -->
+  <div class="total-referencias">
+    <span>Total de referencias:</span>
+    <span class="total-number">{{ productosSeleccionados.length }}</span>
+  </div>
+
+  <!-- Categorías -->
+  <div class="categorias-container">
+    <ion-button
+      *ngFor="let categoria of categorias"
+      [fill]="categoria.selected ? 'solid' : 'outline'"
+      [color]="categoria.selected ? 'primary' : 'medium'"
+      size="small"
+      class="categoria-button"
+      (click)="seleccionarCategoria(categoria)">
+      {{ categoria.nombre }}
+    </ion-button>
+  </div>
+
+  <!-- Lista de productos -->
+  <div class="productos-lista">
+    <div
+      *ngFor="let producto of filteredProductos"
+      class="producto-item"
+      [ngClass]="{'selected': isProductoSeleccionado(producto.id)}"
+      (click)="toggleProducto(producto)">
+      <div class="producto-info">
+        <div class="producto-nombre">{{ producto.nombre }}</div>
+        <div class="producto-disponible">{{ producto.stock }} Disponible</div>
+        <div class="producto-precio">{{ producto.precio }} Bs.</div>
+      </div>
+      <div class="selection-indicator" *ngIf="isProductoSeleccionado(producto.id)">
+        <ion-icon name="checkmark-circle" color="primary"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón Añadir Productos Seleccionados -->
+  <div class="agregar-productos-container">
+    <ion-button
+      expand="block"
+      class="agregar-productos-button"
+      (click)="agregarProductosSeleccionados()"
+      [disabled]="productosSeleccionados.length === 0">
+      Añadir Productos Seleccionados
+    </ion-button>
+  </div>
+</ion-content>

@@ -1,13 +1,57 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>proveedores</ion-title>
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear">
+        <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
+        <ion-label>{{ nombreUsuario }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
+    <ion-searchbar
+      placeholder="Buscar proveedores..."
+      [(ngModel)]="textoBusqueda"
+      (ionInput)="filtrarProveedores()"
+      debounce="300">
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">proveedores</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="proveedores-content">
+  <!-- Total de referencias -->
+  <div class="total-referencias">
+    <span>Total de referencias:</span>
+    <span class="total-number">{{ filteredProveedores.length }}</span>
+  </div>
+
+  <!-- Lista de proveedores -->
+  <div class="proveedores-lista">
+    <div
+      *ngFor="let proveedor of filteredProveedores"
+      class="proveedor-item"
+      (click)="editarProveedor(proveedor)">
+      <div class="proveedor-info">
+        <div class="proveedor-nombre">{{ proveedor.nombre }}</div>
+        <div class="proveedor-telefono">{{ proveedor.telefono }}</div>
+        <div class="proveedor-direccion">{{ proveedor.direccion }}</div>
+        <div class="proveedor-ci">{{ proveedor.ci }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Provider Button -->
+  <div class="create-provider-container">
+    <ion-button
+      expand="block"
+      class="create-provider-button"
+      (click)="crearProveedor()">
+      Crear Proveedor
+    </ion-button>
+  </div>
 </ion-content>

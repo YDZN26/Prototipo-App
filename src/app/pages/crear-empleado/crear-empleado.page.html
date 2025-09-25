@@ -1,0 +1,108 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ esEdicion ? 'Editar Empleado' : 'Crear Empleado' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="crear-empleado-content">
+  <div class="form-container">
+    <!-- Formulario -->
+    <div class="form-section">
+      <!-- Nombre del empleado -->
+      <div class="input-group">
+        <ion-label class="input-label">NombreEmpleado</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el nombre del Empleado"
+          [(ngModel)]="empleado.nombre"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Número de teléfono -->
+      <div class="input-group">
+        <ion-label class="input-label">Número Teléfono:</ion-label>
+        <ion-input
+          type="tel"
+          placeholder="Ingrese el número de teléfono del Empleado"
+          [(ngModel)]="empleado.telefono"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- C.I. Empleado -->
+      <div class="input-group">
+        <ion-label class="input-label">C.I.Empleado</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el documento del Empleado"
+          [(ngModel)]="empleado.ci"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Dirección Empleado -->
+      <div class="input-group">
+        <ion-label class="input-label">DireccionEmpleado</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese la dirección del Empleado"
+          [(ngModel)]="empleado.direccion"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Usuario -->
+      <div class="input-group">
+        <ion-label class="input-label">Usuario</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el usuario del Empleado"
+          [(ngModel)]="empleado.usuario"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="input-group">
+        <ion-label class="input-label">Contraseña</ion-label>
+        <ion-input
+          type="password"
+          placeholder="Ingrese la contraseña del Empleado"
+          [(ngModel)]="empleado.contrasena"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Rol -->
+      <div class="input-group">
+        <ion-label class="input-label">Rol</ion-label>
+        <ion-select
+          placeholder="Seleccione el Rol del empleado"
+          [(ngModel)]="empleado.rol"
+          class="custom-select"
+          interface="popover">
+          <ion-select-option value="administrador">Administrador</ion-select-option>
+          <ion-select-option value="vendedor">Vendedor</ion-select-option>
+          <ion-select-option value="cajero">Cajero</ion-select-option>
+          <ion-select-option value="supervisor">Supervisor</ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+
+    <!-- Botón guardar -->
+    <div class="guardar-container">
+      <ion-button
+        expand="block"
+        class="guardar-button"
+        (click)="guardarEmpleado()">
+        {{ esEdicion ? 'Actualizar Empleado' : 'Guardar Empleado' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

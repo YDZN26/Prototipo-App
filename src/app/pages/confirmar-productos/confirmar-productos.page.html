@@ -1,0 +1,81 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Confirmar Precios y Cantidades</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="confirmar-productos-content">
+  <!-- Lista de productos seleccionados -->
+  <div class="productos-carrito">
+    <div
+      *ngFor="let producto of productosCarrito; let i = index"
+      class="producto-carrito-item">
+
+      <!-- Nombre del producto -->
+      <div class="producto-header">
+        <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+        <ion-button
+          fill="clear"
+          class="eliminar-button"
+          (click)="eliminarProducto(i)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="producto-controls">
+        <!-- Control de cantidad -->
+        <div class="cantidad-control">
+          <ion-label class="control-label">Cantidad*</ion-label>
+          <div class="cantidad-buttons">
+            <ion-button
+              fill="clear"
+              class="cantidad-btn"
+              (click)="decrementarCantidad(i)">
+              <ion-icon name="remove-outline"></ion-icon>
+            </ion-button>
+            <span class="cantidad-display">{{ producto.cantidad }}</span>
+            <ion-button
+              fill="clear"
+              class="cantidad-btn"
+              (click)="incrementarCantidad(i)">
+              <ion-icon name="add-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Precio unitario -->
+        <div class="precio-control">
+          <ion-label class="control-label">Precio Unitario*</ion-label>
+          <ion-input
+            type="number"
+            [(ngModel)]="producto.precioUnitario"
+            (ionInput)="actualizarSubtotal(i)"
+            class="precio-input">
+          </ion-input>
+          <span class="precio-suffix">Bs.</span>
+        </div>
+      </div>
+
+      <!-- Cantidad restante -->
+      <div class="cantidad-restante">
+        <span>Cantidad restante: {{ producto.stock - producto.cantidad }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón Confirmar -->
+  <div class="confirmar-container">
+    <ion-button
+      expand="block"
+      class="confirmar-button"
+      (click)="confirmarVenta()"
+      [disabled]="productosCarrito.length === 0">
+      Confirmar
+    </ion-button>
+  </div>
+</ion-content>

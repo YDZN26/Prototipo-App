@@ -1,0 +1,49 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ esEdicion ? 'Editar Cliente' : 'Crear Cliente' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="crear-cliente-content">
+  <div class="form-container">
+    <!-- Formulario -->
+    <div class="form-section">
+      <!-- Nombre del cliente -->
+      <div class="input-group">
+        <ion-label class="input-label">NombreCliente</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el nombre del cliente"
+          [(ngModel)]="cliente.nombre"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Número de teléfono -->
+      <div class="input-group">
+        <ion-label class="input-label">Número Teléfono:</ion-label>
+        <ion-input
+          type="tel"
+          placeholder="Ingrese el número de teléfono del cliente"
+          [(ngModel)]="cliente.telefono"
+          class="custom-input">
+        </ion-input>
+      </div>
+    </div>
+
+    <!-- Botón guardar -->
+    <div class="guardar-container">
+      <ion-button
+        expand="block"
+        class="guardar-button"
+        (click)="guardarCliente()">
+        {{ esEdicion ? 'Actualizar Cliente' : 'Guardar Cliente' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

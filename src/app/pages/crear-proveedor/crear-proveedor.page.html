@@ -1,0 +1,82 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ esEdicion ? 'Editar Proveedor' : 'Crear Proveedor' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="crear-proveedor-content">
+  <div class="form-container">
+    <!-- Formulario -->
+    <div class="form-section">
+      <!-- Nombre del proveedor -->
+      <div class="input-group">
+        <ion-label class="input-label">NombreProveedor</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el nombre del Proveedor"
+          [(ngModel)]="proveedor.nombre"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Número de teléfono -->
+      <div class="input-group">
+        <ion-label class="input-label">Número Teléfono:</ion-label>
+        <ion-input
+          type="tel"
+          placeholder="Ingrese el número de teléfono del Proveedor"
+          [(ngModel)]="proveedor.telefono"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- C.I. Empleado -->
+      <div class="input-group">
+        <ion-label class="input-label">C.I.Empleado</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el documento del Proveedor"
+          [(ngModel)]="proveedor.ci"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Dirección Empleado -->
+      <div class="input-group">
+        <ion-label class="input-label">DireccionEmpleado</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese la dirección del Proveedor"
+          [(ngModel)]="proveedor.direccion"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Ubicación -->
+      <div class="input-group">
+        <ion-label class="input-label">Ubicacion</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el usuario del Proveedor"
+          [(ngModel)]="proveedor.ubicacion"
+          class="custom-input">
+        </ion-input>
+      </div>
+    </div>
+
+    <!-- Botón guardar -->
+    <div class="guardar-container">
+      <ion-button
+        expand="block"
+        class="guardar-button"
+        (click)="guardarProveedor()">
+        {{ esEdicion ? 'Actualizar Proveedor' : 'Guardar Proveedor' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

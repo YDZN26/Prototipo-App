@@ -1,13 +1,57 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>empleados</ion-title>
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear">
+        <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
+        <ion-label>{{ nombreUsuario }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
+    <ion-searchbar
+      placeholder="Buscar empleados..."
+      [(ngModel)]="textoBusqueda"
+      (ionInput)="filtrarEmpleados()"
+      debounce="300">
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">empleados</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="empleados-content">
+  <!-- Total de referencias -->
+  <div class="total-referencias">
+    <span>Total de referencias:</span>
+    <span class="total-number">{{ filteredEmpleados.length }}</span>
+  </div>
+
+  <!-- Lista de empleados -->
+  <div class="empleados-lista">
+    <div
+      *ngFor="let empleado of filteredEmpleados"
+      class="empleado-item"
+      (click)="editarEmpleado(empleado)">
+      <div class="empleado-info">
+        <div class="empleado-nombre">{{ empleado.nombre }}</div>
+        <div class="empleado-telefono">{{ empleado.telefono }}</div>
+        <div class="empleado-direccion">{{ empleado.direccion }}</div>
+        <div class="empleado-ci">{{ empleado.ci }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Employee Button -->
+  <div class="create-employee-container">
+    <ion-button
+      expand="block"
+      class="create-employee-button"
+      (click)="crearEmpleado()">
+      Crear Empleado
+    </ion-button>
+  </div>
 </ion-content>

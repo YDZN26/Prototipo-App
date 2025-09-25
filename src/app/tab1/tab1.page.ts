@@ -36,14 +36,14 @@ export class Tab1Page {
     },
     {
       name: 'NombreProductos',
-      type: 'TipoDePago', 
+      type: 'TipoDePago',
       time: '00/00/0000 - 00:00 am',
       price: 0
     },
     {
       name: 'NombreProductos',
       type: 'TipoDePago',
-      time: '00/00/0000 - 00:00 am', 
+      time: '00/00/0000 - 00:00 am',
       price: 0
     },
     {
@@ -61,7 +61,7 @@ export class Tab1Page {
   ngOnInit() {
     // Generar días históricos
     this.generarDiasHistoricos(30);
-    
+
     // Seleccionar día actual
     const fecha = new Date();
     const day = fecha.getDate();
@@ -93,7 +93,7 @@ export class Tab1Page {
 
   filtrarItems() {
     const texto = this.textoBusqueda.toLowerCase().trim();
-    
+
     if (!texto) {
       this.filteredProducts = this.recentProducts;
       return;
@@ -108,14 +108,13 @@ export class Tab1Page {
   async seleccionarFechaDesdeCalendario(event: any) {
     const fechaSeleccionada = new Date(event.detail.value);
     const dia = fechaSeleccionada.getDate();
-    const mes = fechaSeleccionada.toLocaleString('es-BO', { month: 'long' }); 
+    const mes = fechaSeleccionada.toLocaleString('es-BO', { month: 'long' });
 
     this.selectedDay = `${dia} de ${mes}`;
     // Aquí cargarías los datos para la fecha seleccionada
   }
 
   registerSale() {
-    // Navegación a página de nueva venta
-    console.log('Registrar venta');
+     this.router.navigate(['/seleccionar-productos']);
   }
 }
