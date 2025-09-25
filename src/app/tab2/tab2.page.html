@@ -1,17 +1,69 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear">
+        <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
+        <ion-label>{{ nombreUsuario }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
+    <ion-searchbar
+      placeholder="Buscar productos..."
+      [(ngModel)]="textoBusqueda"
+      (ionInput)="filtrarProductos()"
+      debounce="300">
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="productos-content">
+  <!-- Total de referencias -->
+  <div class="total-referencias">
+    <span>Total de referencias:</span>
+    <span class="total-number">{{ filteredProductos.length }}</span>
+  </div>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <!-- Categorías -->
+  <div class="categorias-container">
+    <ion-button 
+      *ngFor="let categoria of categorias" 
+      [fill]="categoria.selected ? 'solid' : 'outline'"
+      [color]="categoria.selected ? 'primary' : 'medium'"
+      size="small"
+      class="categoria-button"
+      (click)="seleccionarCategoria(categoria)">
+      {{ categoria.nombre }}
+    </ion-button>
+  </div>
+
+  <!-- Lista de productos -->
+  <div class="productos-lista">
+    <div 
+      *ngFor="let producto of filteredProductos" 
+      class="producto-item"
+      (click)="editarProducto(producto)">
+      <div class="producto-info">
+        <div class="producto-nombre">{{ producto.nombre }}</div>
+        <div class="producto-stock">{{ producto.stock }} Disponible</div>
+        <div class="producto-precio">{{ producto.precio }} Bs.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Product Button -->
+  <div class="create-product-container">
+    <ion-button 
+      expand="block" 
+      class="create-product-button"
+      (click)="crearProducto()">
+      Crear Producto
+    </ion-button>
+  </div>
 </ion-content>

@@ -1,0 +1,111 @@
+.productos-content {
+  --background: #f5f5f5;
+  --padding-top: 20px;
+  --padding-bottom: 100px;
+}
+
+// Total de referencias
+.total-referencias {
+  background: white;
+  margin: 20px 15px 15px 15px;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  color: #333;
+  
+  .total-number {
+    font-weight: bold;
+    color: #2979FF;
+  }
+}
+
+// Categorías
+.categorias-container {
+  padding: 0 15px 15px 15px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .categoria-button {
+    --background: transparent;
+    --background-activated: #2979FF;
+    --color: #666;
+    --border-color: #ddd;
+    --border-width: 1px;
+    --border-radius: 20px;
+    height: 35px;
+    font-size: 14px;
+    margin: 0;
+    
+    &[fill="solid"] {
+      --background: #2979FF;
+      --color: white;
+      --border-color: #2979FF;
+    }
+  }
+}
+
+// Lista de productos
+.productos-lista {
+  padding: 0 15px 120px 15px; // Espacio para el botón
+
+  .producto-item {
+    background: #e5e5e5;
+    padding: 20px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:active {
+      background: #d5d5d5;
+    }
+
+    .producto-info {
+      .producto-nombre {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .producto-stock {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 3px;
+      }
+
+      .producto-precio {
+        font-size: 14px;
+        color: #666;
+      }
+    }
+  }
+}
+
+// Botón crear producto
+.create-product-container {
+  padding: 20px 15px;
+  position: fixed;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  background: transparent;
+  z-index: 100;
+
+  .create-product-button {
+    --background: #2979FF;
+    --background-activated: #1976D2;
+    --background-hover: #1976D2;
+    --color: white;
+    --border-radius: 12px;
+    height: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(41, 121, 255, 0.3);
+  }
+}

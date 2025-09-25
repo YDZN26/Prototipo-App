@@ -1,0 +1,93 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="volver()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ esEdicion ? 'Editar Producto' : 'Crear Producto' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="crear-producto-content">
+  <div class="form-container">
+    <!-- Imagen del producto -->
+    <div class="imagen-container">
+      <div class="imagen-placeholder" (click)="seleccionarImagen()">
+        <ion-icon name="camera-outline" size="large"></ion-icon>
+        <span>Imagen Producto</span>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-section">
+      <!-- Nombre del producto -->
+      <div class="input-group">
+        <ion-label class="input-label">NombreProducto</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese el nombre del Producto"
+          [(ngModel)]="producto.nombre"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Cantidad -->
+      <div class="input-group">
+        <ion-label class="input-label">Cantidad</ion-label>
+        <ion-input
+          type="number"
+          placeholder="Ingrese la cantidad"
+          [(ngModel)]="producto.cantidad"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Precio Unitario -->
+      <div class="input-group">
+        <ion-label class="input-label">PrecioUnitario</ion-label>
+        <ion-input
+          type="number"
+          placeholder="Ingrese el precio unitario"
+          [(ngModel)]="producto.precioUnitario"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Costo Unitario -->
+      <div class="input-group">
+        <ion-label class="input-label">CostoUnitario</ion-label>
+        <ion-input
+          type="number"
+          placeholder="Ingrese el costo unitario"
+          [(ngModel)]="producto.costoUnitario"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <!-- Categoría -->
+      <div class="input-group">
+        <ion-label class="input-label">Categoría</ion-label>
+        <ion-select
+          placeholder="Seleccione la categoría"
+          [(ngModel)]="producto.categoria"
+          class="custom-select"
+          interface="popover">
+          <ion-select-option value="categoria1">Categoría 1</ion-select-option>
+          <ion-select-option value="categoria2">Categoría 2</ion-select-option>
+          <ion-select-option value="categoria3">Categoría 3</ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+
+    <!-- Botón guardar -->
+    <div class="guardar-container">
+      <ion-button 
+        expand="block" 
+        class="guardar-button"
+        (click)="guardarProducto()">
+        {{ esEdicion ? 'Actualizar Producto' : 'Guardar Producto' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

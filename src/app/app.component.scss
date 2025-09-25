@@ -1,0 +1,26 @@
+// Estilos globales para el calendario
+ion-datetime {
+  --color: #333 !important;
+  
+  .calendar-day {
+    color: #333 !important;
+  }
+  
+  .calendar-day.calendar-day-today {
+    color: #2979FF !important;
+    font-weight: bold !important;
+  }
+  
+  .calendar-day[aria-selected="true"] {
+    background: #2979FF !important;
+    color: white !important;
+  }
+  
+  .datetime-header .datetime-title {
+    color: #333 !important;
+  }
+  
+  .calendar-day-of-week {
+    color: #666 !important;
+  }
+}

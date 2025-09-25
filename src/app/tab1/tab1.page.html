@@ -1,17 +1,110 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button fill="clear">
+        <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
+        <ion-label>{{ nombreUsuario }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
+
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-segment scrollable [(ngModel)]="selectedDay" (ionChange)="onDaySelected(selectedDay)">
+      <ion-segment-button
+        *ngFor="let day of days"
+        [value]="day.value"
+        [ngClass]="{ 'selected-date': day.value === selectedDay }">
+          {{ day.label }}
+        </ion-segment-button>
+      </ion-segment>    
+      <ion-buttons slot="end">
+        <ion-button id="abrirCalendario">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
+    <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
+      <ion-searchbar
+        placeholder="Buscar ventas..."
+        [(ngModel)]="textoBusqueda"
+        (ionInput)="filtrarItems()"
+        debounce="300">
+      </ion-searchbar>
+    </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <!-- Sales Summary - FIJO -->
+  <div class="sales-summary-fixed">
+    <h3>Ventas de Hoy</h3>
+    <div class="sales-row">
+      <span>Efectivo:</span>
+      <span class="amount">{{ salesData.efectivo }} Bs.</span>
+    </div>
+    <div class="sales-row">
+      <span>Transferencia:</span>
+      <span class="amount">{{ salesData.transferencia }} Bs.</span>
+    </div>
+    <div class="sales-row">
+      <span>Tarjeta:</span>
+      <span class="amount">{{ salesData.tarjeta }} Bs.</span>
+    </div>
+    <div class="sales-row total-row">
+      <span>Total:</span>
+      <span class="amount">{{ salesData.total }} Bs.</span>
+    </div>
+  </div>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <!-- Recent Products - SCROLLEABLE -->
+  <div class="scrollable-products">
+    <ion-list>
+      <ion-item *ngFor="let product of filteredProducts" class="product-item">
+        <ion-label>
+          <h2>{{ product.name }}</h2>
+          <p><strong>{{ product.type }}</strong></p>
+          <p>{{ product.time }}</p>
+        </ion-label>
+        <div slot="end">
+          <strong>{{ product.price }} Bs.</strong>
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <!-- Register Sale Button -->
+  <div class="register-sale-container">
+    <ion-button 
+      expand="block" 
+      class="register-sale-button"
+      (click)="registerSale()">
+      Registrar Venta
+    </ion-button>
+  </div>
 </ion-content>
+
+<ion-modal #modalCalendario trigger="abrirCalendario">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar style="--background: #001E87; --color: white;">
+        <ion-title>Selecciona una fecha</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="modalCalendario.dismiss()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="calendar-modal-dark">
+      <ion-datetime
+        presentation="date"
+        [value]="fechaActualISO"
+        (ionChange)="seleccionarFechaDesdeCalendario($event); modalCalendario.dismiss();"
+        class="calendar-datetime-dark">
+      </ion-datetime>
+    </ion-content>
+  </ng-template>
+</ion-modal>
