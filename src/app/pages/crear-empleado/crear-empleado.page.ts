@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-crear-empleado',
@@ -12,6 +13,7 @@ export class CrearEmpleadoPage implements OnInit {
 
   esEdicion: boolean = false;
   empleadoId: string = '';
+  loading = false;
 
   empleado = {
     nombre: '',
@@ -23,91 +25,113 @@ export class CrearEmpleadoPage implements OnInit {
     rol: ''
   };
 
+  roles = [
+    { value: 'administrador', label: 'Administrador' },
+    { value: 'vendedor', label: 'Vendedor' }
+  ];
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private location: Location
+    private location: Location,
+    private supabaseService: SupabaseService
   ) {}
 
-  ngOnInit() {
-    // Verificar si es edición
+  async ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.empleadoId = params.get('id') || '';
       this.esEdicion = !!this.empleadoId;
-
+      
       if (this.esEdicion) {
         this.cargarEmpleado();
       }
     });
   }
 
-  cargarEmpleado() {
-    // Aquí cargarías el empleado desde la base de datos
-    // Por ahora simulamos datos
-    this.empleado = {
-      nombre: 'Empleado Ejemplo',
-      telefono: '+591 12345678',
-      ci: '12345678 LP',
-      direccion: 'Calle Ejemplo #123',
-      usuario: 'empleado123',
-      contrasena: '',
-      rol: 'vendedor'
-    };
+  async cargarEmpleado() {
+    try {
+      const empleados = await this.supabaseService.getEmpleados();
+      const empleadoData = empleados.find(e => e.id == this.empleadoId);
+      
+      if (empleadoData) {
+        this.empleado = {
+          nombre: empleadoData.nombre,
+          telefono: empleadoData.telefono || '',
+          ci: empleadoData.ci || '',
+          direccion: empleadoData.direccion || '',
+          usuario: empleadoData.usuario,
+          contrasena: '', // No mostrar contraseña por seguridad
+          rol: empleadoData.rol
+        };
+      }
+    } catch (error) {
+      console.error('Error cargando empleado:', error);
+    }
   }
 
   volver() {
     this.location.back();
   }
 
-  guardarEmpleado() {
-    // Validar que los campos requeridos estén llenos
+  async guardarEmpleado() {
+    if (!this.validarEmpleado()) return;
+
+    this.loading = true;
+
+    try {
+      if (this.esEdicion) {
+        await this.supabaseService.updateEmpleado(parseInt(this.empleadoId), this.empleado);
+        console.log('Empleado actualizado');
+      } else {
+        await this.supabaseService.createEmpleado(this.empleado);
+        console.log('Empleado creado');
+      }
+
+      this.router.navigate(['/tabs/empleados']);
+    } catch (error) {
+      console.error('Error guardando empleado:', error);
+      alert('Error al guardar el empleado. Verifica que el usuario no esté duplicado.');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  validarEmpleado(): boolean {
     if (!this.empleado.nombre.trim()) {
-      console.log('El nombre del empleado es requerido');
-      return;
+      alert('El nombre del empleado es requerido');
+      return false;
     }
 
     if (!this.empleado.telefono.trim()) {
-      console.log('El teléfono del empleado es requerido');
-      return;
+      alert('El teléfono del empleado es requerido');
+      return false;
     }
 
     if (!this.empleado.ci.trim()) {
-      console.log('El C.I. del empleado es requerido');
-      return;
+      alert('El C.I. del empleado es requerido');
+      return false;
     }
 
     if (!this.empleado.direccion.trim()) {
-      console.log('La dirección del empleado es requerida');
-      return;
+      alert('La dirección del empleado es requerida');
+      return false;
     }
 
     if (!this.empleado.usuario.trim()) {
-      console.log('El usuario del empleado es requerido');
-      return;
+      alert('El usuario del empleado es requerido');
+      return false;
     }
 
     if (!this.empleado.contrasena.trim() && !this.esEdicion) {
-      console.log('La contraseña del empleado es requerida');
-      return;
+      alert('La contraseña del empleado es requerida');
+      return false;
     }
 
     if (!this.empleado.rol) {
-      console.log('Debe seleccionar un rol para el empleado');
-      return;
+      alert('Debe seleccionar un rol para el empleado');
+      return false;
     }
 
-    // Aquí enviarías los datos a la base de datos
-    console.log('Guardando empleado:', this.empleado);
-
-    if (this.esEdicion) {
-      console.log('Actualizando empleado existente');
-      // Actualizar empleado existente
-    } else {
-      console.log('Creando nuevo empleado');
-      // Crear nuevo empleado
-    }
-
-    // Volver a la página de empleados
-    this.router.navigate(['/tabs/empleados']);
+    return true;
   }
 }

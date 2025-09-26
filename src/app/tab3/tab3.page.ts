@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { SupabaseService } from '../services/supabase';
 
 @Component({
   selector: 'app-tab3',
@@ -13,45 +14,30 @@ export class Tab3Page implements OnInit {
   mostrarCampoBusqueda = false;
   textoBusqueda: string = '';
 
-  clientes = [
-    {
-      id: 1,
-      nombre: 'NombreCliente',
-      telefono: 'Telefono'
-    },
-    {
-      id: 2,
-      nombre: 'NombreCliente',
-      telefono: 'Telefono'
-    },
-    {
-      id: 3,
-      nombre: 'NombreCliente',
-      telefono: 'Telefono'
-    },
-    {
-      id: 4,
-      nombre: 'NombreCliente',
-      telefono: 'Telefono'
-    },
-    {
-      id: 5,
-      nombre: 'NombreCliente',
-      telefono: 'Telefono'
-    },
-    {
-      id: 6,
-      nombre: 'NombreCliente',
-      telefono: 'Telefono'
+  clientes: any[] = [];
+  filteredClientes: any[] = [];
+  loading = false;
+
+  constructor(
+    private router: Router,
+    private supabaseService: SupabaseService
+  ) {}
+
+  async ngOnInit() {
+    await this.cargarClientes();
+  }
+
+  async cargarClientes() {
+    this.loading = true;
+    try {
+      const data = await this.supabaseService.getClientes();
+      this.clientes = data;
+      this.filtrarClientes();
+    } catch (error) {
+      console.error('Error cargando clientes:', error);
+    } finally {
+      this.loading = false;
     }
-  ];
-
-  filteredClientes = this.clientes;
-
-  constructor(private router: Router) {}
-
-  ngOnInit() {
-    this.filtrarClientes();
   }
 
   filtrarClientes() {
@@ -63,19 +49,20 @@ export class Tab3Page implements OnInit {
     const texto = this.textoBusqueda.toLowerCase();
     this.filteredClientes = this.clientes.filter(cliente =>
       cliente.nombre.toLowerCase().includes(texto) ||
-      cliente.telefono.toLowerCase().includes(texto)
+      cliente.telefono?.toLowerCase().includes(texto)
     );
   }
 
   editarCliente(cliente: any) {
-    // Navegar a página de editar cliente
-    console.log('Editar cliente:', cliente);
     this.router.navigate(['/editar-cliente', cliente.id]);
   }
 
   crearCliente() {
-    // Navegar a página de crear cliente
-    console.log('Crear nuevo cliente');
     this.router.navigate(['/crear-cliente']);
+  }
+
+  async ionViewWillEnter() {
+    // Recargar clientes cuando se vuelve a la página
+    await this.cargarClientes();
   }
 }

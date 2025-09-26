@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { IonModal } from '@ionic/angular';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-nueva-venta',
@@ -16,19 +17,21 @@ export class NuevaVentaPage implements OnInit {
   fechaVenta: string = '';
   fechaVentaISO: string = new Date().toISOString();
   conceptoVenta: string = '';
+  loading = false;
 
-  venta = {
+  venta: {
+    clienteId: string;
+    metodoPago: string;
+    total: number;
+    productos: any[];
+  } = {
     clienteId: '',
     metodoPago: '',
     total: 0,
     productos: []
   };
 
-  clientes = [
-    { id: 1, nombre: 'Cliente Ejemplo 1' },
-    { id: 2, nombre: 'Cliente Ejemplo 2' },
-    { id: 3, nombre: 'Cliente Ejemplo 3' }
-  ];
+  clientes: any[] = [];
 
   metodosPago = [
     { id: 'efectivo', nombre: 'Efectivo', icono: 'cash-outline' },
@@ -39,14 +42,18 @@ export class NuevaVentaPage implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private location: Location
+    private location: Location,
+    private supabaseService: SupabaseService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     // Establecer fecha actual
     const hoy = new Date();
     this.fechaVenta = `Hoy, ${hoy.getDate()} ${hoy.toLocaleDateString('es-ES', { month: 'long' })}`;
-
+    
+    // Cargar clientes desde Supabase
+    await this.cargarClientes();
+    
     // Obtener productos del carrito si vienen de confirmación
     this.route.queryParams.subscribe(params => {
       if (params['productos']) {
@@ -57,6 +64,14 @@ export class NuevaVentaPage implements OnInit {
         this.actualizarConcepto();
       }
     });
+  }
+
+  async cargarClientes() {
+    try {
+      this.clientes = await this.supabaseService.getClientes();
+    } catch (error) {
+      console.error('Error cargando clientes:', error);
+    }
   }
 
   volver() {
@@ -85,41 +100,59 @@ export class NuevaVentaPage implements OnInit {
   }
 
   actualizarConcepto() {
-  const productosCount = this.venta.productos.length;
-
-  if (productosCount === 0) {
-    this.conceptoVenta = '0 NombreProducto, 0 NombreProducto';
-  } else if (productosCount === 1) {
-    const producto = this.venta.productos[0] as any;
-    this.conceptoVenta = `1 ${producto.nombre}`;
-  } else {
-    const nombres = (this.venta.productos as any[]).map(p => p.nombre).slice(0, 2);
-    this.conceptoVenta = `${productosCount} productos: ${nombres.join(', ')}`;
+    const productosCount = this.venta.productos.length;
+    
+    if (productosCount === 0) {
+      this.conceptoVenta = '0 NombreProducto, 0 NombreProducto';
+    } else if (productosCount === 1) {
+      const producto = this.venta.productos[0] as any;
+      this.conceptoVenta = `1 ${producto.nombre}`;
+    } else {
+      const nombres = (this.venta.productos as any[]).map(p => p.nombre).slice(0, 2);
+      this.conceptoVenta = `${productosCount} productos: ${nombres.join(', ')}`;
+    }
   }
-}
 
   puedeCrearVenta(): boolean {
     return !!(this.venta.clienteId && this.venta.metodoPago && this.venta.productos.length > 0);
   }
 
-  finalizarVenta() {
+  async finalizarVenta() {
     if (!this.puedeCrearVenta()) {
-      console.log('Faltan datos requeridos para finalizar la venta');
+      alert('Faltan datos requeridos para finalizar la venta');
       return;
     }
 
-    // Crear la venta final
-    const ventaFinal = {
-      fecha: this.fechaVentaISO,
-      clienteId: this.venta.clienteId,
-      metodoPago: this.venta.metodoPago,
-      productos: this.venta.productos,
-      total: this.venta.total
-    };
+    this.loading = true;
 
-    console.log('Venta creada:', ventaFinal);
+    try {
+      // Crear la venta en Supabase
+      const ventaFinal = {
+        fecha: this.fechaVentaISO,
+        clienteId: parseInt(this.venta.clienteId),
+        metodoPago: this.venta.metodoPago,
+        productos: this.venta.productos,
+        total: this.venta.total
+      };
 
-    // Navegar al detalle de venta o volver al dashboard
-    this.router.navigate(['/tabs/tab1']);
+      const ventaCreada = await this.supabaseService.createVenta(ventaFinal);
+      
+      console.log('Venta creada exitosamente:', ventaCreada);
+      
+      // Navegar al detalle de venta
+      this.router.navigate(['/detalle-venta'], {
+        queryParams: {
+          ventaData: JSON.stringify({
+            ...ventaFinal,
+            id: ventaCreada.id
+          })
+        }
+      });
+    } catch (error) {
+      console.error('Error creando venta:', error);
+      alert('Error al crear la venta. Intenta nuevamente.');
+    } finally {
+      this.loading = false;
+    }
   }
 }

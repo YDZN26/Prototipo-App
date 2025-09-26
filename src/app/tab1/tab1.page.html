@@ -1,9 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar style="--background: #001E87; --color: white;">
     <ion-buttons slot="start">
-      <ion-button fill="clear">
+      <!-- SOLO CAMBIAR ESTA LÍNEA - Agregar (click) y icono -->
+      <ion-button fill="clear" (click)="mostrarOpcionesUsuario($event)">
         <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
         <ion-label>{{ nombreUsuario }}</ion-label>
+        <ion-icon name="chevron-down-outline" slot="end" size="small"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
@@ -39,6 +41,7 @@
     </ion-toolbar>
 </ion-header>
 
+<!-- El resto del código HTML permanece igual -->
 <ion-content [fullscreen]="true" class="dashboard-content">
   <!-- Sales Summary - FIJO -->
   <div class="sales-summary-fixed">
@@ -64,7 +67,7 @@
   <!-- Recent Products - SCROLLEABLE -->
   <div class="scrollable-products">
     <ion-list>
-      <ion-item *ngFor="let product of filteredProducts" class="product-item">
+      <ion-item *ngFor="let product of filteredProducts" class="product-item" (click)="verDetalleVenta(product)">
         <ion-label>
           <h2>{{ product.name }}</h2>
           <p><strong>{{ product.type }}</strong></p>

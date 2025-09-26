@@ -1,0 +1,67 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-title>Detalle Venta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="detalle-venta-content">
+  <div class="detalle-container">
+    <!-- Título -->
+    <div class="titulo-detalle">
+      <h2>Detalle de la venta</h2>
+    </div>
+
+    <!-- Detalle de productos -->
+    <div class="detalle-productos">
+      <div class="detalle-header">
+        <h3>Detalle:</h3>
+      </div>
+
+      <div class="productos-vendidos">
+        <div 
+          *ngFor="let producto of venta.productos" 
+          class="producto-vendido-item">
+          <span class="producto-info">x{{ producto.cantidad }} {{ producto.nombre }}</span>
+          <span class="producto-precio">{{ producto.subtotal || (producto.cantidad * producto.precioUnitario) }} Bs.</span>
+        </div>
+      </div>
+
+      <!-- Valor Total -->
+      <div class="valor-total">
+        <div class="total-line"></div>
+        <div class="total-row">
+          <span class="total-label">Valor Total:</span>
+          <span class="total-amount">{{ venta.total }} Bs.</span>
+        </div>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="info-adicional">
+        <div class="info-row">
+          <span class="info-label">Fecha y Hora</span>
+          <span class="info-value">{{ fechaFormateada }}</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="info-label">Método de Pago</span>
+          <span class="info-value">{{ metodoPagoTexto }}</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="info-label">Empleado</span>
+          <span class="info-value">NombreEmpleado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón Listo -->
+    <div class="listo-container">
+      <ion-button 
+        expand="block" 
+        class="listo-button"
+        (click)="volverInicio()">
+        Listo
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

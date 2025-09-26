@@ -80,28 +80,29 @@
       </div>
 
       <!-- Rol -->
-      <div class="input-group">
-        <ion-label class="input-label">Rol</ion-label>
-        <ion-select
-          placeholder="Seleccione el Rol del empleado"
-          [(ngModel)]="empleado.rol"
-          class="custom-select"
-          interface="popover">
-          <ion-select-option value="administrador">Administrador</ion-select-option>
-          <ion-select-option value="vendedor">Vendedor</ion-select-option>
-          <ion-select-option value="cajero">Cajero</ion-select-option>
-          <ion-select-option value="supervisor">Supervisor</ion-select-option>
-        </ion-select>
-      </div>
+    <div class="input-group">
+      <ion-label class="input-label">Rol</ion-label>
+      <ion-select
+        placeholder="Seleccione el Rol del empleado"
+        [(ngModel)]="empleado.rol"
+        class="custom-select"
+        interface="popover">
+        <ion-select-option *ngFor="let rol of roles" [value]="rol.value">
+          {{ rol.label }}
+        </ion-select-option>
+      </ion-select>
+    </div>
     </div>
 
     <!-- Botón guardar -->
     <div class="guardar-container">
-      <ion-button
-        expand="block"
+      <ion-button 
+        expand="block" 
         class="guardar-button"
-        (click)="guardarEmpleado()">
-        {{ esEdicion ? 'Actualizar Empleado' : 'Guardar Empleado' }}
+        (click)="guardarEmpleado()"
+        [disabled]="loading">
+        <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+        {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Empleado' : 'Guardar Empleado') }}
       </ion-button>
     </div>
   </div>

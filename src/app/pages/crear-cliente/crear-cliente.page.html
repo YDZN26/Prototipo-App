@@ -38,12 +38,14 @@
 
     <!-- Botón guardar -->
     <div class="guardar-container">
-      <ion-button
-        expand="block"
-        class="guardar-button"
-        (click)="guardarCliente()">
-        {{ esEdicion ? 'Actualizar Cliente' : 'Guardar Cliente' }}
-      </ion-button>
+      <ion-button 
+          expand="block" 
+          class="guardar-button"
+          (click)="guardarCliente()"
+          [disabled]="loading">
+          <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+          {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Cliente' : 'Guardar Cliente') }}
+        </ion-button>
     </div>
   </div>
 </ion-content>

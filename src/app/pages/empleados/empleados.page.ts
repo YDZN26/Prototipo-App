@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-empleados',
@@ -13,43 +14,30 @@ export class EmpleadosPage implements OnInit {
   mostrarCampoBusqueda = false;
   textoBusqueda: string = '';
 
-  empleados = [
-    {
-      id: 1,
-      nombre: 'NombreEmpleado',
-      telefono: 'Telefono',
-      direccion: 'Dirección',
-      ci: 'C.I.'
-    },
-    {
-      id: 2,
-      nombre: 'NombreEmpleado',
-      telefono: 'Telefono',
-      direccion: 'Dirección',
-      ci: 'C.I.'
-    },
-    {
-      id: 3,
-      nombre: 'NombreEmpleado',
-      telefono: 'Telefono',
-      direccion: 'Dirección',
-      ci: 'C.I.'
-    },
-    {
-      id: 4,
-      nombre: 'NombreEmpleado',
-      telefono: 'Telefono',
-      direccion: 'Dirección',
-      ci: 'C.I.'
+  empleados: any[] = [];
+  filteredEmpleados: any[] = [];
+  loading = false;
+
+  constructor(
+    private router: Router,
+    private supabaseService: SupabaseService
+  ) {}
+
+  async ngOnInit() {
+    await this.cargarEmpleados();
+  }
+
+  async cargarEmpleados() {
+    this.loading = true;
+    try {
+      const data = await this.supabaseService.getEmpleados();
+      this.empleados = data;
+      this.filtrarEmpleados();
+    } catch (error) {
+      console.error('Error cargando empleados:', error);
+    } finally {
+      this.loading = false;
     }
-  ];
-
-  filteredEmpleados = this.empleados;
-
-  constructor(private router: Router) {}
-
-  ngOnInit() {
-    this.filtrarEmpleados();
   }
 
   filtrarEmpleados() {
@@ -61,21 +49,21 @@ export class EmpleadosPage implements OnInit {
     const texto = this.textoBusqueda.toLowerCase();
     this.filteredEmpleados = this.empleados.filter(empleado =>
       empleado.nombre.toLowerCase().includes(texto) ||
-      empleado.telefono.toLowerCase().includes(texto) ||
-      empleado.direccion.toLowerCase().includes(texto) ||
-      empleado.ci.toLowerCase().includes(texto)
+      empleado.telefono?.toLowerCase().includes(texto) ||
+      empleado.direccion?.toLowerCase().includes(texto) ||
+      empleado.ci?.toLowerCase().includes(texto)
     );
   }
 
   editarEmpleado(empleado: any) {
-    // Navegar a página de editar empleado
-    console.log('Editar empleado:', empleado);
     this.router.navigate(['/editar-empleado', empleado.id]);
   }
 
   crearEmpleado() {
-    // Navegar a página de crear empleado
-    console.log('Crear nuevo empleado');
     this.router.navigate(['/crear-empleado']);
+  }
+
+  async ionViewWillEnter() {
+    await this.cargarEmpleados();
   }
 }

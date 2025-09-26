@@ -74,12 +74,15 @@ const routes: Routes = [
   {
     path: 'seleccionar-productos',
     loadChildren: () => import('./pages/seleccionar-productos/seleccionar-productos.module').then(m => m.SeleccionarProductosPageModule)
-  },  {
+  },
+  {
     path: 'confirmar-productos',
     loadChildren: () => import('./pages/confirmar-productos/confirmar-productos.module').then( m => m.ConfirmarProductosPageModule)
+  },
+  {
+    path: 'detalle-venta',
+    loadChildren: () => import('./pages/detalle-venta/detalle-venta.module').then(m => m.DetalleVentaPageModule)
   }
-
-
 ];
 @NgModule({
   imports: [

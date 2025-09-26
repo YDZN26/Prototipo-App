@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { SupabaseService } from '../services/supabase';
 
 @Component({
   selector: 'app-tab2',
@@ -13,56 +14,54 @@ export class Tab2Page implements OnInit {
   mostrarCampoBusqueda = false;
   textoBusqueda: string = '';
 
-  categorias = [
-    { nombre: 'Todas las categorías', selected: true },
-    { nombre: 'Categoría 1', selected: false },
-    { nombre: 'Categoría 2', selected: false }
-  ];
+  categorias: any[] = [];
+  productos: any[] = [];
+  filteredProductos: any[] = [];
+  loading = false;
 
-  productos = [
-    {
-      id: 1,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
-    },
-    {
-      id: 2,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
-    },
-    {
-      id: 3,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 2'
-    },
-    {
-      id: 4,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 2'
-    },
-    {
-      id: 5,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
+  constructor(
+    private router: Router,
+    private supabaseService: SupabaseService
+  ) {}
+
+  async ngOnInit() {
+    await this.cargarDatos();
+  }
+
+  async cargarDatos() {
+    this.loading = true;
+    try {
+      // Cargar categorías
+      const categoriasData = await this.supabaseService.getCategorias();
+      this.categorias = [
+        { id: 0, nombre: 'Todas las categorías', selected: true },
+        ...categoriasData.map(cat => ({ ...cat, selected: false }))
+      ];
+
+      // Cargar productos
+      await this.cargarProductos();
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    } finally {
+      this.loading = false;
     }
-  ];
+  }
 
-  filteredProductos = this.productos;
-
-  constructor(private router: Router) {}
-
-  ngOnInit() {
-    this.filtrarProductos();
+  async cargarProductos() {
+    try {
+      const data = await this.supabaseService.getProductos();
+      this.productos = data.map(producto => ({
+        id: producto.id,
+        nombre: producto.nombre,
+        stock: producto.stock,
+        precio: producto.precio,
+        categoria: producto.categorias?.nombre || 'Sin categoría',
+        categoria_id: producto.categoria_id
+      }));
+      this.filtrarProductos();
+    } catch (error) {
+      console.error('Error cargando productos:', error);
+    }
   }
 
   seleccionarCategoria(categoriaSeleccionada: any) {
@@ -80,9 +79,9 @@ export class Tab2Page implements OnInit {
 
     // Filtrar por categoría
     const categoriaActiva = this.categorias.find(cat => cat.selected);
-    if (categoriaActiva && categoriaActiva.nombre !== 'Todas las categorías') {
+    if (categoriaActiva && categoriaActiva.id !== 0) {
       productosTemp = productosTemp.filter(producto => 
-        producto.categoria === categoriaActiva.nombre
+        producto.categoria_id === categoriaActiva.id
       );
     }
 
@@ -97,11 +96,16 @@ export class Tab2Page implements OnInit {
     this.filteredProductos = productosTemp;
   }
 
-  crearProducto() {
-  this.router.navigate(['/crear-producto']);
-}
+  editarProducto(producto: any) {
+    this.router.navigate(['/editar-producto', producto.id]);
+  }
 
-editarProducto(producto: any) {
-  this.router.navigate(['/editar-producto', producto.id]);
-}
+  crearProducto() {
+    this.router.navigate(['/crear-producto']);
+  }
+
+  async ionViewWillEnter() {
+    // Recargar productos cuando se vuelve a la página
+    await this.cargarProductos();
+  }
 }

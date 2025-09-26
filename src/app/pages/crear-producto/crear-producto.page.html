@@ -73,9 +73,9 @@
           [(ngModel)]="producto.categoria"
           class="custom-select"
           interface="popover">
-          <ion-select-option value="categoria1">Categoría 1</ion-select-option>
-          <ion-select-option value="categoria2">Categoría 2</ion-select-option>
-          <ion-select-option value="categoria3">Categoría 3</ion-select-option>
+          <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
+            {{ categoria.nombre }}
+          </ion-select-option>
         </ion-select>
       </div>
     </div>
@@ -83,11 +83,13 @@
     <!-- Botón guardar -->
     <div class="guardar-container">
       <ion-button 
-        expand="block" 
-        class="guardar-button"
-        (click)="guardarProducto()">
-        {{ esEdicion ? 'Actualizar Producto' : 'Guardar Producto' }}
-      </ion-button>
+          expand="block" 
+          class="guardar-button"
+          (click)="guardarProducto()"
+          [disabled]="loading">
+          <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+          {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Producto' : 'Guardar Producto') }}
+        </ion-button>
     </div>
   </div>
 </ion-content>

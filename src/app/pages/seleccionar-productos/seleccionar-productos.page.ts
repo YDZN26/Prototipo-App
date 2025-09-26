@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-seleccionar-productos',
@@ -10,80 +11,52 @@ import { Location } from '@angular/common';
 })
 export class SeleccionarProductosPage implements OnInit {
 
-  // Parámetros de la venta
-  clienteId: string = '';
-  metodoPago: string = '';
-  fecha: string = '';
-
-  categorias = [
-    { nombre: 'Todas las categorías', selected: true },
-    { nombre: 'Categoría 1', selected: false },
-    { nombre: 'Categoría 2', selected: false }
-  ];
-
-  productos = [
-    {
-      id: 1,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
-    },
-    {
-      id: 2,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
-    },
-    {
-      id: 3,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 2'
-    },
-    {
-      id: 4,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 2'
-    },
-    {
-      id: 5,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
-    },
-    {
-      id: 6,
-      nombre: 'NombreProductos',
-      stock: 0,
-      precio: 0,
-      categoria: 'Categoría 1'
-    }
-  ];
-
-  filteredProductos = this.productos;
+  categorias: any[] = [];
+  productos: any[] = [];
+  filteredProductos: any[] = [];
   productosSeleccionados: any[] = [];
+  loading = false;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private location: Location
+    private location: Location,
+    private supabaseService: SupabaseService
   ) {}
 
-  ngOnInit() {
-    // Obtener parámetros de la venta
-    this.route.queryParams.subscribe(params => {
-      this.clienteId = params['clienteId'];
-      this.metodoPago = params['metodoPago'];
-      this.fecha = params['fecha'];
-    });
+  async ngOnInit() {
+    await this.cargarDatos();
+  }
 
-    this.filtrarProductos();
+  async cargarDatos() {
+    this.loading = true;
+    try {
+      // Cargar categorías
+      const categoriasData = await this.supabaseService.getCategorias();
+      this.categorias = [
+        { id: 0, nombre: 'Todas las categorías', selected: true },
+        ...categoriasData.map(cat => ({ ...cat, selected: false }))
+      ];
+
+      // Cargar productos con stock disponible
+      const productosData = await this.supabaseService.getProductos();
+      this.productos = productosData
+        .filter(producto => producto.stock > 0) // Solo productos con stock
+        .map(producto => ({
+          id: producto.id,
+          nombre: producto.nombre,
+          stock: producto.stock,
+          precio: producto.precio,
+          categoria: producto.categorias?.nombre || 'Sin categoría',
+          categoria_id: producto.categoria_id
+        }));
+
+      this.filtrarProductos();
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    } finally {
+      this.loading = false;
+    }
   }
 
   volver() {
@@ -91,21 +64,16 @@ export class SeleccionarProductosPage implements OnInit {
   }
 
   seleccionarCategoria(categoriaSeleccionada: any) {
-    // Desseleccionar todas las categorías
     this.categorias.forEach(cat => cat.selected = false);
-
-    // Seleccionar la categoría clickeada
     categoriaSeleccionada.selected = true;
-
     this.filtrarProductos();
   }
 
   filtrarProductos() {
-    // Filtrar por categoría
     const categoriaActiva = this.categorias.find(cat => cat.selected);
-    if (categoriaActiva && categoriaActiva.nombre !== 'Todas las categorías') {
-      this.filteredProductos = this.productos.filter(producto =>
-        producto.categoria === categoriaActiva.nombre
+    if (categoriaActiva && categoriaActiva.id !== 0) {
+      this.filteredProductos = this.productos.filter(producto => 
+        producto.categoria_id === categoriaActiva.id
       );
     } else {
       this.filteredProductos = this.productos;
@@ -118,31 +86,29 @@ export class SeleccionarProductosPage implements OnInit {
 
   toggleProducto(producto: any) {
     const index = this.productosSeleccionados.findIndex(p => p.id === producto.id);
-
+    
     if (index > -1) {
-      // Si ya está seleccionado, lo removemos
       this.productosSeleccionados.splice(index, 1);
     } else {
-      // Si no está seleccionado, lo agregamos
       this.productosSeleccionados.push({
         ...producto,
         cantidad: 1,
+        precioUnitario: producto.precio,
         subtotal: producto.precio
       });
     }
   }
 
   agregarProductosSeleccionados() {
-  if (this.productosSeleccionados.length === 0) {
-    console.log('No hay productos seleccionados');
-    return;
-  }
-
-  // Navegar a la página de confirmación (carrito)
-  this.router.navigate(['/confirmar-productos'], {
-    queryParams: {
-      productos: JSON.stringify(this.productosSeleccionados)
+    if (this.productosSeleccionados.length === 0) {
+      alert('No hay productos seleccionados');
+      return;
     }
-  });
-}
+
+    this.router.navigate(['/confirmar-productos'], {
+      queryParams: {
+        productos: JSON.stringify(this.productosSeleccionados)
+      }
+    });
+  }
 }

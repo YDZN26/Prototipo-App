@@ -71,12 +71,13 @@
 
     <!-- Botón Finalizar Venta -->
     <div class="crear-venta-container">
-      <ion-button
-        expand="block"
+      <ion-button 
+        expand="block" 
         class="crear-venta-button"
         (click)="finalizarVenta()"
-        [disabled]="!puedeCrearVenta()">
-        Finalizar Venta
+        [disabled]="!puedeCrearVenta() || loading">
+        <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+        {{ loading ? 'Creando Venta...' : 'Finalizar Venta' }}
       </ion-button>
     </div>
   </div>

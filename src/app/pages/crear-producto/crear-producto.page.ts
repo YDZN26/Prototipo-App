@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-crear-producto',
@@ -12,6 +13,8 @@ export class CrearProductoPage implements OnInit {
 
   esEdicion: boolean = false;
   productoId: string = '';
+  categorias: any[] = [];
+  loading = false;
 
   producto = {
     nombre: '',
@@ -25,11 +28,13 @@ export class CrearProductoPage implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private location: Location
+    private location: Location,
+    private supabaseService: SupabaseService
   ) {}
 
-  ngOnInit() {
-    // Verificar si es edición
+  async ngOnInit() {
+    await this.cargarCategorias();
+    
     this.route.paramMap.subscribe(params => {
       this.productoId = params.get('id') || '';
       this.esEdicion = !!this.productoId;
@@ -40,63 +45,86 @@ export class CrearProductoPage implements OnInit {
     });
   }
 
-  cargarProducto() {
-    // Aquí cargarías el producto desde la base de datos
-    // Por ahora simulamos datos
-    this.producto = {
-      nombre: 'Producto Ejemplo',
-      cantidad: 10,
-      precioUnitario: 50.00,
-      costoUnitario: 30.00,
-      categoria: 'categoria1',
-      imagen: null
-    };
+  async cargarCategorias() {
+    try {
+      this.categorias = await this.supabaseService.getCategorias();
+    } catch (error) {
+      console.error('Error cargando categorías:', error);
+    }
   }
 
-  seleccionarImagen() {
-    // Aquí implementarías la selección de imagen
-    console.log('Seleccionar imagen del producto');
-    // Podrías usar Capacitor Camera o un file input
+  async cargarProducto() {
+    try {
+      const productos = await this.supabaseService.getProductos();
+      const productoData = productos.find(p => p.id == this.productoId);
+      
+      if (productoData) {
+        this.producto = {
+          nombre: productoData.nombre,
+          cantidad: productoData.stock,
+          precioUnitario: productoData.precio,
+          costoUnitario: productoData.costo || 0,
+          categoria: productoData.categoria_id,
+          imagen: null
+        };
+      }
+    } catch (error) {
+      console.error('Error cargando producto:', error);
+    }
   }
 
   volver() {
     this.location.back();
   }
 
-  guardarProducto() {
-    // Validar que los campos requeridos estén llenos
+  async guardarProducto() {
+    if (!this.validarProducto()) return;
+
+    this.loading = true;
+
+    try {
+      if (this.esEdicion) {
+        await this.supabaseService.updateProducto(parseInt(this.productoId), this.producto);
+        console.log('Producto actualizado');
+      } else {
+        await this.supabaseService.createProducto(this.producto);
+        console.log('Producto creado');
+      }
+
+      this.router.navigate(['/tabs/tab2']);
+    } catch (error) {
+      console.error('Error guardando producto:', error);
+      alert('Error al guardar el producto');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  validarProducto(): boolean {
     if (!this.producto.nombre.trim()) {
-      console.log('El nombre del producto es requerido');
-      return;
+      alert('El nombre del producto es requerido');
+      return false;
     }
 
     if (this.producto.cantidad <= 0) {
-      console.log('La cantidad debe ser mayor a 0');
-      return;
+      alert('La cantidad debe ser mayor a 0');
+      return false;
     }
 
     if (this.producto.precioUnitario <= 0) {
-      console.log('El precio unitario debe ser mayor a 0');
-      return;
+      alert('El precio unitario debe ser mayor a 0');
+      return false;
     }
 
     if (!this.producto.categoria) {
-      console.log('Debe seleccionar una categoría');
-      return;
+      alert('Debe seleccionar una categoría');
+      return false;
     }
 
-    // Aquí enviarías los datos a la base de datos
-    console.log('Guardando producto:', this.producto);
+    return true;
+  }
 
-    if (this.esEdicion) {
-      console.log('Actualizando producto existente');
-      // Actualizar producto existente
-    } else {
-      console.log('Creando nuevo producto');
-      // Crear nuevo producto
-    }
-
-    // Volver a la página de productos
-    this.router.navigate(['/tabs/tab2']);
+  seleccionarImagen() {
+    console.log('Seleccionar imagen del producto');
   }
 }

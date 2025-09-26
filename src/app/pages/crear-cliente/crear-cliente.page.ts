@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-crear-cliente',
@@ -12,6 +13,7 @@ export class CrearClientePage implements OnInit {
 
   esEdicion: boolean = false;
   clienteId: string = '';
+  loading = false;
 
   cliente = {
     nombre: '',
@@ -21,58 +23,75 @@ export class CrearClientePage implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private location: Location
+    private location: Location,
+    private supabaseService: SupabaseService
   ) {}
 
-  ngOnInit() {
-    // Verificar si es edición
+  async ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.clienteId = params.get('id') || '';
       this.esEdicion = !!this.clienteId;
-
+      
       if (this.esEdicion) {
         this.cargarCliente();
       }
     });
   }
 
-  cargarCliente() {
-    // Aquí cargarías el cliente desde la base de datos
-    // Por ahora simulamos datos
-    this.cliente = {
-      nombre: 'Cliente Ejemplo',
-      telefono: '+591 12345678'
-    };
+  async cargarCliente() {
+    try {
+      const clientes = await this.supabaseService.getClientes();
+      const clienteData = clientes.find(c => c.id == this.clienteId);
+      
+      if (clienteData) {
+        this.cliente = {
+          nombre: clienteData.nombre,
+          telefono: clienteData.telefono || ''
+        };
+      }
+    } catch (error) {
+      console.error('Error cargando cliente:', error);
+    }
   }
 
   volver() {
     this.location.back();
   }
 
-  guardarCliente() {
-    // Validar que los campos requeridos estén llenos
+  async guardarCliente() {
+    if (!this.validarCliente()) return;
+
+    this.loading = true;
+
+    try {
+      if (this.esEdicion) {
+        await this.supabaseService.updateCliente(parseInt(this.clienteId), this.cliente);
+        console.log('Cliente actualizado');
+      } else {
+        await this.supabaseService.createCliente(this.cliente);
+        console.log('Cliente creado');
+      }
+
+      this.router.navigate(['/tabs/tab3']);
+    } catch (error) {
+      console.error('Error guardando cliente:', error);
+      alert('Error al guardar el cliente');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  validarCliente(): boolean {
     if (!this.cliente.nombre.trim()) {
-      console.log('El nombre del cliente es requerido');
-      return;
+      alert('El nombre del cliente es requerido');
+      return false;
     }
 
     if (!this.cliente.telefono.trim()) {
-      console.log('El teléfono del cliente es requerido');
-      return;
+      alert('El teléfono del cliente es requerido');
+      return false;
     }
 
-    // Aquí enviarías los datos a la base de datos
-    console.log('Guardando cliente:', this.cliente);
-
-    if (this.esEdicion) {
-      console.log('Actualizando cliente existente');
-      // Actualizar cliente existente
-    } else {
-      console.log('Creando nuevo cliente');
-      // Crear nuevo cliente
-    }
-
-    // Volver a la página de clientes
-    this.router.navigate(['/tabs/tab3']);
+    return true;
   }
 }

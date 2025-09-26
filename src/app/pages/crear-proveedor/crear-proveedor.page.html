@@ -15,7 +15,7 @@
     <div class="form-section">
       <!-- Nombre del proveedor -->
       <div class="input-group">
-        <ion-label class="input-label">NombreProveedor</ion-label>
+        <ion-label class="input-label">Nombre Completo</ion-label>
         <ion-input
           type="text"
           placeholder="Ingrese el nombre del Proveedor"
@@ -37,7 +37,7 @@
 
       <!-- C.I. Empleado -->
       <div class="input-group">
-        <ion-label class="input-label">C.I.Empleado</ion-label>
+        <ion-label class="input-label">C.I.</ion-label>
         <ion-input
           type="text"
           placeholder="Ingrese el documento del Proveedor"
@@ -48,7 +48,7 @@
 
       <!-- Dirección Empleado -->
       <div class="input-group">
-        <ion-label class="input-label">DireccionEmpleado</ion-label>
+        <ion-label class="input-label">Direccion</ion-label>
         <ion-input
           type="text"
           placeholder="Ingrese la dirección del Proveedor"
@@ -71,11 +71,13 @@
 
     <!-- Botón guardar -->
     <div class="guardar-container">
-      <ion-button
-        expand="block"
+      <ion-button 
+        expand="block" 
         class="guardar-button"
-        (click)="guardarProveedor()">
-        {{ esEdicion ? 'Actualizar Proveedor' : 'Guardar Proveedor' }}
+        (click)="guardarProveedor()"
+        [disabled]="loading">
+        <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+        {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Proveedor' : 'Guardar Proveedor') }}
       </ion-button>
     </div>
   </div>

@@ -39,11 +39,13 @@
       </ion-item>
 
       <ion-button 
-        expand="block" 
-        class="login-button"
-        (click)="login()">
-        Iniciar Sesión
-      </ion-button>
+  expand="block" 
+  class="login-button"
+  (click)="login()"
+  [disabled]="loading">
+  <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+  {{ loading ? 'Iniciando...' : 'Iniciar Sesión' }}
+</ion-button>
     </div>
   </div>
 </ion-content>
