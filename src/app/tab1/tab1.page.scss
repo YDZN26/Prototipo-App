@@ -1,54 +1,54 @@
 .dashboard-content {
   --background: #f5f5f5;
-  --padding-top: 20px; // Más espacio para que no se tape con el header
+  --padding-top: 20px;
   --padding-bottom: 100px;
 }
 
 // Header user info and segment styles
 ion-toolbar {
-  // AGREGAR ESTILOS PARA EL BOTÓN DE USUARIO
+  // Estilos para el botón de usuario
   ion-buttons[slot="start"] {
     ion-button {
       --padding-start: 8px;
       --padding-end: 8px;
-      
-      ion-label {
+
+      // Ocultar el label en móvil, mostrar solo en tablet+
+      .user-label-desktop {
+        display: none; // Oculto por defecto en móvil
         margin-left: 8px;
         margin-right: 4px;
         font-weight: 600;
         font-size: 14px;
       }
-      
+
+      // Mostrar label solo en tablet y desktop (768px+)
+      @media (min-width: 768px) {
+        .user-label-desktop {
+          display: inline-block;
+        }
+      }
+
       ion-icon[name="chevron-down-outline"] {
         margin-left: 4px;
         opacity: 0.7;
       }
-      
-      // Efecto hover/active
+
       &:hover {
         --background: rgba(255, 255, 255, 0.1);
       }
     }
   }
 
-  ion-segment {
-    --background: transparent;
-    
-    ion-segment-button {
-      --color: rgba(255, 255, 255, 0.7);
-      --color-checked: white;
-      --background-checked: rgba(255, 255, 255, 0.2);
-      --border-radius: 20px;
-      min-width: auto;
-      padding: 0 12px;
-      margin: 0 2px;
-      font-size: 14px;
+  // Título de fecha centrado
+  .fecha-titulo {
+    font-size: 14px; // Más pequeño en móvil
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.5px;
 
-      &.selected-date {
-        --color: white !important;
-        --background: rgba(255, 255, 255, 0.2) !important;
-        font-weight: bold !important;
-      }
+    // Título más grande en tablet/desktop
+    @media (min-width: 768px) {
+      font-size: 16px;
     }
   }
 }
@@ -95,8 +95,8 @@ ion-toolbar {
 // Contenedor scrolleable para productos
 .scrollable-products {
   margin-top: 15px;
-  padding-bottom: 100px; // Espacio para el botón
-  
+  padding-bottom: 100px;
+
   ion-list {
     background: transparent;
     padding: 0 15px;
@@ -105,7 +105,8 @@ ion-toolbar {
       --background: #e5e5e5;
       --border-radius: 12px;
       margin-bottom: 8px;
-      
+      cursor: pointer;
+
       ion-label {
         h2 {
           font-size: 16px;
@@ -113,19 +114,19 @@ ion-toolbar {
           color: #333;
           margin: 0;
         }
-        
+
         p {
           font-size: 14px;
           color: #666;
           margin: 2px 0;
-          
+
           &:last-child {
             font-size: 12px;
             color: #888;
           }
         }
       }
-      
+
       div[slot="end"] {
         strong {
           font-size: 16px;
@@ -133,21 +134,42 @@ ion-toolbar {
         }
       }
     }
+
+    // Mensaje cuando no hay ventas
+    .no-ventas {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      color: #999;
+
+      ion-icon {
+        color: #ccc;
+        margin-bottom: 12px;
+      }
+
+      p {
+        font-size: 16px;
+        margin: 0;
+      }
+    }
   }
 }
 
-// Register Sale Button - más abajo y color correcto
+// Register Sale Button
 .register-sale-container {
   padding: 20px 15px;
   position: fixed;
-  bottom: 5px; // Más abajo - antes estaba en 80px
+  bottom: 5px;
   left: 0;
   right: 0;
   background: transparent;
   z-index: 100;
 
   .register-sale-button {
-    --background: #2979FF; // Color correcto que acordamos
+    --background: #2979FF;
     --background-activated: #1976D2;
     --background-hover: #1976D2;
     --color: white;
@@ -159,73 +181,71 @@ ion-toolbar {
   }
 }
 
-// Modal styles - calendario con fondo oscuro
-ion-modal {
-  .calendar-modal-dark {
-    --background: #2e2e2e; // Fondo gris oscuro
-    
-    .calendar-datetime-dark {
-      padding: 20px;
-      --background: #2e2e2e;
-      --color: white; // Texto blanco por defecto
-      
-      // Colores para el tema oscuro
-      --ion-color-primary: #2979FF;
-      --ion-color-primary-rgb: 41, 121, 255;
-      --ion-color-primary-contrast: white;
-      --ion-text-color: white;
+// Modal de filtro de fechas
+.modal-filtro-content {
+  --background: #f5f5f5;
+  padding: 20px;
+
+  .filtros-rapidos {
+    margin-bottom: 30px;
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    ion-button {
+      --border-width: 2px;
+      --border-color: #2979FF;
+      --color: #2979FF;
+      margin-bottom: 10px;
+      height: 50px;
+      font-weight: 500;
+
+      &:hover {
+        --background: rgba(41, 121, 255, 0.1);
+      }
+    }
+  }
+
+  .rango-personalizado {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 16px 0;
+    }
+
+    ion-item {
+      --background: transparent;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      margin-bottom: 16px;
+    }
+
+    ion-button {
+      --background: #2979FF;
+      --background-activated: #1976D2;
+      --color: white;
+      height: 50px;
+      font-weight: 600;
     }
   }
 }
 
-// Estilos específicos para el datetime con tema oscuro
-.calendar-datetime-dark {
-  ::ng-deep {
-    // Fechas normales - blanco sobre fondo oscuro
-    .calendar-day {
-      color: black !important;
-      background-color: transparent !important;
-    }
-    
-    // Fecha seleccionada - azul brillante
-    .calendar-day[aria-selected="true"] {
-      background-color: #2979FF !important;
-      color: black !important;
-    }
-    
-    // Fecha de hoy (no seleccionada)
-    .calendar-day-today:not([aria-selected="true"]) {
-      color: #2979FF !important;
-      font-weight: bold !important;
-    }
-    
-    // Días de la semana (D, L, M, etc.) - gris claro
-    .calendar-day-of-week {
-      color: #b0b0b0 !important;
-    }
-    
-    // Header del mes/año
-    .datetime-header {
-      color: white !important;
-    }
-    
-    .datetime-title {
-      color: white !important;
-    }
-    
-    // Botones de navegación (< >)
-    .calendar-next-prev {
-      color: white !important;
-    }
-  }
-}
-
-// AGREGAR ESTILOS PARA ALERTAS
+// Estilos para alertas
 .alert-wrapper {
   .alert-button.danger {
     color: #e53e3e !important;
   }
-  
+
   .alert-button.secondary {
     color: #666 !important;
   }

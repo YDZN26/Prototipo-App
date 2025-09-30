@@ -12,7 +12,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-// Grupos de input
 .input-group {
   margin-bottom: 25px;
 
@@ -21,7 +20,6 @@
   }
 }
 
-// Labels
 .input-label {
   display: block;
   font-size: 16px;
@@ -30,38 +28,32 @@
   margin-bottom: 12px;
 }
 
-// Botón de fecha
-.date-button {
-  --background: white;
-  --color: #333;
-  --border-color: #ddd;
+// Botón para seleccionar cliente
+.select-cliente-button {
   --border-width: 1px;
-  --border-radius: 8px;
+  --border-color: #ddd;
+  --color: #333;
   --padding-start: 16px;
   --padding-end: 16px;
-  width: 100%;
-  height: 48px;
-  font-size: 16px;
+  height: 50px;
   text-align: left;
-  justify-content: flex-start;
+  justify-content: space-between;
+  margin: 0;
+
+  .cliente-seleccionado {
+    flex: 1;
+    text-align: left;
+    margin: 0 12px;
+    font-size: 16px;
+  }
+
+  &[fill="outline"] {
+    .cliente-seleccionado {
+      color: #999;
+    }
+  }
 }
 
-// Select personalizado
-.custom-select {
-  --background: white;
-  --color: #333;
-  --placeholder-color: #999;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --border-radius: 8px;
-  --border-color: #ddd;
-  --border-style: solid;
-  --border-width: 1px;
-  --min-height: 48px;
-  font-size: 16px;
-}
-
-// Métodos de pago
 .payment-methods {
   display: flex;
   gap: 10px;
@@ -89,37 +81,10 @@
   }
 }
 
-// Input de concepto
-.concepto-input {
-  --background: #f8f9fa;
-  --color: #666;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --border-radius: 8px;
-  --border-color: #e0e0e0;
-  --border-style: solid;
-  --border-width: 1px;
-  --min-height: 48px;
-  font-size: 16px;
-}
-
-// Total a cobrar
-.total-amount {
-  font-size: 24px;
-  font-weight: bold;
-  color: #2979FF;
-  text-align: center;
-  padding: 15px;
-  background: #f0f8ff;
-  border-radius: 8px;
-  border: 2px solid #2979FF;
-}
-
-// Botón crear venta
-.crear-venta-container {
+.continuar-container {
   margin-top: 30px;
 
-  .crear-venta-button {
+  .continuar-button {
     --background: #2979FF;
     --background-activated: #1976D2;
     --background-hover: #1976D2;
@@ -139,52 +104,123 @@
   }
 }
 
-// Modal calendar styles
-.calendar-modal-dark {
-  --background: #2e2e2e;
+// CORRECCIÓN: Estilos globales para los modales
+ion-modal {
+  --background: #f5f5f5;
 
-  .calendar-datetime-dark {
-    padding: 20px;
-    --background: #2e2e2e;
-    --color: white;
-    --ion-color-primary: #2979FF;
-    --ion-color-primary-rgb: 41, 121, 255;
-    --ion-color-primary-contrast: white;
-    --ion-text-color: white;
+  ion-content {
+    --background: #f5f5f5;
+  }
+
+  ion-toolbar[color="light"] {
+    --background: #ffffff;
   }
 }
 
-.calendar-datetime-dark {
-  ::ng-deep {
-    .calendar-day {
-      color: white !important;
-      background-color: transparent !important;
+// Estilos del modal de clientes
+.crear-cliente-container {
+  padding: 16px;
+  background: #f5f5f5;
+
+  ion-button {
+    margin: 0;
+  }
+}
+
+ion-list {
+  background: #f5f5f5; // CAMBIO: de transparent a #f5f5f5
+  padding: 0 16px;
+
+  ion-item {
+    --background: white;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); // Agregar sombra sutil
+
+    &.selected-item {
+      --background: #e3f2fd;
+      border-left: 4px solid #2979FF;
     }
 
-    .calendar-day[aria-selected="true"] {
-      background-color: #2979FF !important;
-      color: white !important;
+    h2 {
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 4px 0;
     }
 
-    .calendar-day-today:not([aria-selected="true"]) {
-      color: #2979FF !important;
-      font-weight: bold !important;
+    p {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
     }
+  }
+}
 
-    .calendar-day-of-week {
-      color: #b0b0b0 !important;
-    }
+.no-resultados {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #f5f5f5; // Agregar fondo claro
 
-    .datetime-header {
-      color: white !important;
-    }
+  ion-icon {
+    color: #ccc;
+    margin-bottom: 16px;
+  }
 
-    .datetime-title {
-      color: white !important;
-    }
+  p {
+    font-size: 16px;
+    color: #999;
+    margin: 0 0 20px 0;
+  }
+}
 
-    .calendar-next-prev {
-      color: white !important;
+// Estilos del formulario de nuevo cliente
+.form-nuevo-cliente {
+  --background: #f5f5f5;
+
+  ion-content {
+    --background: #f5f5f5;
+  }
+}
+
+.form-container-modal {
+  padding: 20px 15px;
+  background: white;
+  margin: 20px 15px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .custom-input {
+    --background: white;
+    --color: #333;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --border-radius: 8px;
+    --border-color: #ddd;
+    --border-style: solid;
+    --border-width: 1px;
+    --min-height: 48px;
+    font-size: 16px;
+  }
+
+  .guardar-button {
+    --background: #2979FF;
+    --background-activated: #1976D2;
+    --color: white;
+    --border-radius: 12px;
+    height: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    margin-top: 20px;
+
+    &[disabled] {
+      --background: #ccc;
+      --color: #666;
     }
   }
 }

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { IonModal, AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
 
 @Component({
@@ -11,10 +12,23 @@ import { SupabaseService } from '../../services/supabase';
 })
 export class CrearProductoPage implements OnInit {
 
+  @ViewChild('modalOpcionesImagen', { static: false }) modalOpcionesImagen!: IonModal;
+  @ViewChild('modalURL', { static: false }) modalURL!: IonModal;
+  @ViewChild('modalCategorias', { static: false }) modalCategorias!: IonModal;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
+
   esEdicion: boolean = false;
   productoId: string = '';
   categorias: any[] = [];
   loading = false;
+
+  modalImagenAbierto: boolean = false;
+  modalURLAbierto: boolean = false;
+  modalCategoriasAbierto: boolean = false;
+  urlTemporal: string = '';
+  imagenCargada: boolean = false;
+  imagenError: boolean = false;
+  categoriaSeleccionadaNombre: string = '';
 
   producto = {
     nombre: '',
@@ -22,23 +36,24 @@ export class CrearProductoPage implements OnInit {
     precioUnitario: 0,
     costoUnitario: 0,
     categoria: '',
-    imagen: null
+    imagenUrl: ''
   };
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
     await this.cargarCategorias();
-    
+
     this.route.paramMap.subscribe(params => {
       this.productoId = params.get('id') || '';
       this.esEdicion = !!this.productoId;
-      
+
       if (this.esEdicion) {
         this.cargarProducto();
       }
@@ -57,7 +72,7 @@ export class CrearProductoPage implements OnInit {
     try {
       const productos = await this.supabaseService.getProductos();
       const productoData = productos.find(p => p.id == this.productoId);
-      
+
       if (productoData) {
         this.producto = {
           nombre: productoData.nombre,
@@ -65,8 +80,13 @@ export class CrearProductoPage implements OnInit {
           precioUnitario: productoData.precio,
           costoUnitario: productoData.costo || 0,
           categoria: productoData.categoria_id,
-          imagen: null
+          imagenUrl: productoData.imagen_url || ''
         };
+
+        const categoriaSeleccionada = this.categorias.find(c => c.id === productoData.categoria_id);
+        if (categoriaSeleccionada) {
+          this.categoriaSeleccionadaNombre = categoriaSeleccionada.nombre;
+        }
       }
     } catch (error) {
       console.error('Error cargando producto:', error);
@@ -77,24 +97,114 @@ export class CrearProductoPage implements OnInit {
     this.location.back();
   }
 
+  // Gestión de modales de imagen
+  mostrarOpcionesImagen() {
+    this.modalImagenAbierto = true;
+  }
+
+  cerrarModalImagen() {
+    this.modalImagenAbierto = false;
+  }
+
+  mostrarFormularioURL() {
+    this.modalImagenAbierto = false;
+    this.modalURLAbierto = true;
+    this.urlTemporal = '';
+    this.imagenCargada = false;
+    this.imagenError = false;
+  }
+
+  cerrarModalURL() {
+    this.modalURLAbierto = false;
+    this.modalImagenAbierto = true;
+  }
+
+  // Opción 1: Subir desde dispositivo
+  abrirGaleria() {
+    this.cerrarModalImagen();
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.mostrarAlerta('Error', 'Por favor selecciona un archivo de imagen válido');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.producto.imagenUrl = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Opción 2: Pegar URL
+  guardarURL() {
+    if (this.urlTemporal && !this.imagenError) {
+      this.producto.imagenUrl = this.urlTemporal;
+      this.cerrarModalURL();
+      this.modalImagenAbierto = false;
+    }
+  }
+
+  onImageLoad() {
+    this.imagenCargada = true;
+    this.imagenError = false;
+  }
+
+  onImageError() {
+    this.imagenCargada = false;
+    this.imagenError = true;
+  }
+
+  eliminarImagen() {
+    this.producto.imagenUrl = '';
+  }
+
+  // Gestión de modal de categorías
+  abrirModalCategorias() {
+    this.modalCategoriasAbierto = true;
+  }
+
+  cerrarModalCategorias() {
+    this.modalCategoriasAbierto = false;
+  }
+
+  seleccionarCategoria(categoria: any) {
+    this.producto.categoria = categoria.id;
+    this.categoriaSeleccionadaNombre = categoria.nombre;
+    this.cerrarModalCategorias();
+  }
+
+  // Guardar producto
   async guardarProducto() {
     if (!this.validarProducto()) return;
 
     this.loading = true;
 
     try {
+      const productoData = {
+        nombre: this.producto.nombre,
+        cantidad: this.producto.cantidad,
+        precioUnitario: this.producto.precioUnitario,
+        costoUnitario: this.producto.costoUnitario,
+        categoria: this.producto.categoria,
+        imagenUrl: this.producto.imagenUrl
+      };
+
       if (this.esEdicion) {
-        await this.supabaseService.updateProducto(parseInt(this.productoId), this.producto);
-        console.log('Producto actualizado');
+        await this.supabaseService.updateProducto(parseInt(this.productoId), productoData);
       } else {
-        await this.supabaseService.createProducto(this.producto);
-        console.log('Producto creado');
+        await this.supabaseService.createProducto(productoData);
       }
 
       this.router.navigate(['/tabs/tab2']);
     } catch (error) {
       console.error('Error guardando producto:', error);
-      alert('Error al guardar el producto');
+      this.mostrarAlerta('Error', 'No se pudo guardar el producto');
     } finally {
       this.loading = false;
     }
@@ -102,29 +212,34 @@ export class CrearProductoPage implements OnInit {
 
   validarProducto(): boolean {
     if (!this.producto.nombre.trim()) {
-      alert('El nombre del producto es requerido');
+      this.mostrarAlerta('Error', 'El nombre del producto es requerido');
       return false;
     }
 
     if (this.producto.cantidad <= 0) {
-      alert('La cantidad debe ser mayor a 0');
+      this.mostrarAlerta('Error', 'La cantidad debe ser mayor a 0');
       return false;
     }
 
     if (this.producto.precioUnitario <= 0) {
-      alert('El precio unitario debe ser mayor a 0');
+      this.mostrarAlerta('Error', 'El precio unitario debe ser mayor a 0');
       return false;
     }
 
     if (!this.producto.categoria) {
-      alert('Debe seleccionar una categoría');
+      this.mostrarAlerta('Error', 'Debe seleccionar una categoría');
       return false;
     }
 
     return true;
   }
 
-  seleccionarImagen() {
-    console.log('Seleccionar imagen del producto');
+  async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertController.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

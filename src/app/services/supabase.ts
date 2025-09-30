@@ -21,7 +21,7 @@ export class SupabaseService {
       .from('categorias')
       .select('*')
       .order('id', { ascending: true });
-    
+
     if (error) throw error;
     return data;
   }
@@ -35,7 +35,7 @@ export class SupabaseService {
         categorias (nombre)
       `)
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data;
   }
@@ -48,10 +48,11 @@ export class SupabaseService {
         precio: producto.precioUnitario,
         costo: producto.costoUnitario,
         stock: producto.cantidad,
-        categoria_id: producto.categoria
+        categoria_id: producto.categoria,
+        imagen_url: producto.imagenUrl || null // AGREGADO
       }])
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -64,11 +65,12 @@ export class SupabaseService {
         precio: producto.precioUnitario,
         costo: producto.costoUnitario,
         stock: producto.cantidad,
-        categoria_id: producto.categoria
+        categoria_id: producto.categoria,
+        imagen_url: producto.imagenUrl || null // AGREGADO
       })
       .eq('id', id)
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -78,7 +80,7 @@ export class SupabaseService {
       .from('productos')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
   }
 
@@ -88,7 +90,7 @@ export class SupabaseService {
       .from('clientes')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data;
   }
@@ -101,7 +103,7 @@ export class SupabaseService {
         telefono: cliente.telefono
       }])
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -115,7 +117,7 @@ export class SupabaseService {
       })
       .eq('id', id)
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -126,7 +128,7 @@ export class SupabaseService {
       .from('empleados')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data;
   }
@@ -144,7 +146,7 @@ export class SupabaseService {
         rol: empleado.rol
       }])
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -163,7 +165,7 @@ export class SupabaseService {
       })
       .eq('id', id)
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -174,7 +176,7 @@ export class SupabaseService {
       .from('proveedores')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data;
   }
@@ -190,7 +192,7 @@ export class SupabaseService {
         ubicacion: proveedor.ubicacion
       }])
       .select();
-    
+
     if (error) throw error;
     return data;
   }
@@ -207,35 +209,31 @@ export class SupabaseService {
       })
       .eq('id', id)
       .select();
-    
+
     if (error) throw error;
     return data;
   }
 
-  // VENTAS - MÉTODOS CORREGIDOS
+  // VENTAS
   async createVenta(venta: any) {
-    // Crear fecha actual ajustada a zona horaria de Bolivia (UTC-4)
     const fechaActual = new Date();
-    // Bolivia está 4 horas atrás de UTC
     const fechaBolivia = new Date(fechaActual.getTime() - (4 * 60 * 60 * 1000));
-    
-    // Insertar venta principal
+
     const { data: ventaData, error: ventaError } = await this.supabase
       .from('ventas')
       .insert([{
-        fecha: fechaBolivia.toISOString(), // Ahora guarda hora de Bolivia
+        fecha: fechaBolivia.toISOString(),
         cliente_id: venta.clienteId,
         metodo_pago: venta.metodoPago,
         total: venta.total,
         empleado_id: venta.empleadoId || 1
       }])
       .select();
-    
+
     if (ventaError) throw ventaError;
 
     const ventaId = ventaData[0].id;
 
-    // Resto del código igual...
     const productosVenta = venta.productos.map((producto: any) => ({
       venta_id: ventaId,
       producto_id: producto.id,
@@ -247,7 +245,7 @@ export class SupabaseService {
     const { error: productosError } = await this.supabase
       .from('venta_productos')
       .insert(productosVenta);
-    
+
     if (productosError) throw productosError;
 
     return ventaData[0];
@@ -270,8 +268,8 @@ export class SupabaseService {
       `)
       .gte('fecha', fechaInicio)
       .lte('fecha', fechaFin)
-      .order('fecha', { ascending: false }); // CORREGIDO: usar 'fecha' en lugar de 'created_at'
-    
+      .order('fecha', { ascending: false });
+
     if (error) throw error;
     return data;
   }
@@ -293,7 +291,7 @@ export class SupabaseService {
       `)
       .eq('id', id)
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -306,7 +304,7 @@ export class SupabaseService {
       .eq('usuario', usuario)
       .eq('contrasena', contrasena)
       .single();
-    
+
     if (error) throw error;
     return data;
   }

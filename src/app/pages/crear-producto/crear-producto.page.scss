@@ -14,6 +14,38 @@
   justify-content: center;
   margin-bottom: 30px;
 
+  .imagen-preview {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 32px;
+      height: 32px;
+      --background: rgba(0, 0, 0, 0.5);
+      --border-radius: 50%;
+
+      ion-icon {
+        font-size: 24px;
+        color: white;
+      }
+    }
+  }
+
   .imagen-placeholder {
     width: 150px;
     height: 150px;
@@ -81,24 +113,37 @@
   --border-style: solid;
   --border-width: 1px;
   --min-height: 48px;
-  
+
   font-size: 16px;
 }
 
-// Select personalizado
-.custom-select {
-  --background: white;
+// Botón para seleccionar categoría
+.select-categoria-button {
+  --border-width: 1px;
+  --border-color: #ddd;
+  --background: white; // AGREGAR ESTO - fondo blanco
   --color: #333;
-  --placeholder-color: #999;
   --padding-start: 16px;
   --padding-end: 16px;
-  --border-radius: 8px;
-  --border-color: #ddd;
-  --border-style: solid;
-  --border-width: 1px;
-  --min-height: 48px;
-  
-  font-size: 16px;
+  height: 50px;
+  text-align: left;
+  justify-content: space-between;
+  margin: 0;
+
+  .categoria-seleccionada {
+    flex: 1;
+    text-align: left;
+    margin: 0 12px;
+    font-size: 16px;
+    color: #333; // AGREGAR ESTO - texto oscuro cuando hay selección
+  }
+
+  // Cuando no hay categoría seleccionada, mostrar placeholder gris
+  &[fill="outline"]:not(.categoria-selected) {
+    .categoria-seleccionada {
+      color: #999;
+    }
+  }
 }
 
 // Contenedor del botón
@@ -115,6 +160,163 @@
     font-weight: 600;
     font-size: 16px;
     box-shadow: 0 4px 12px rgba(41, 121, 255, 0.3);
+    margin: 0;
+  }
+}
+
+// Estilos para los modales
+ion-modal {
+  --background: #f5f5f5;
+
+  ion-content {
+    --background: #f5f5f5;
+  }
+}
+
+// Modal de opciones de imagen
+.modal-opciones-imagen {
+  --background: #f5f5f5;
+
+  .opciones-container {
+    padding: 20px 15px;
+
+    .opcion-button {
+      --border-width: 2px;
+      --border-color: #2979FF;
+      --color: #2979FF;
+      --border-radius: 12px;
+      height: 60px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 15px;
+
+      ion-icon {
+        font-size: 24px;
+      }
+
+      &:hover {
+        --background: rgba(41, 121, 255, 0.1);
+      }
+    }
+  }
+}
+
+// Modal de URL
+.modal-url-content {
+  --background: #f5f5f5;
+
+  .url-container {
+    padding: 20px 15px;
+
+    .preview-container {
+      margin: 20px 0;
+
+      .preview-image {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 12px;
+
+        img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+
+        .preview-loading {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        .preview-error {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          color: #e53e3e;
+
+          ion-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+          }
+
+          p {
+            margin: 0;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    .guardar-url-button {
+      --background: #2979FF;
+      --background-activated: #1976D2;
+      --color: white;
+      --border-radius: 12px;
+      height: 50px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 20px;
+
+      &[disabled] {
+        --background: #ccc;
+        --color: #666;
+      }
+    }
+  }
+}
+
+// Estilos para el modal de categorías
+ion-list {
+  background: #f5f5f5;
+  padding: 16px;
+
+  ion-item {
+    --background: white;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    &.selected-item {
+      --background: #e3f2fd;
+      border-left: 4px solid #2979FF;
+    }
+
+    h2 {
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+}
+
+.no-categorias {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #f5f5f5;
+
+  ion-icon {
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #999;
     margin: 0;
   }
 }

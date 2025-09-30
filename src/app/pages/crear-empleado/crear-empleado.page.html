@@ -79,25 +79,25 @@
         </ion-input>
       </div>
 
-      <!-- Rol -->
-    <div class="input-group">
-      <ion-label class="input-label">Rol</ion-label>
-      <ion-select
-        placeholder="Seleccione el Rol del empleado"
-        [(ngModel)]="empleado.rol"
-        class="custom-select"
-        interface="popover">
-        <ion-select-option *ngFor="let rol of roles" [value]="rol.value">
-          {{ rol.label }}
-        </ion-select-option>
-      </ion-select>
-    </div>
+      <!-- Rol - ACTUALIZADO CON MODAL -->
+      <div class="input-group">
+        <ion-label class="input-label">Rol</ion-label>
+        <ion-button
+          expand="block"
+          fill="outline"
+          class="select-rol-button"
+          (click)="abrirModalRoles()">
+          <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+          <span class="rol-seleccionado">{{ rolSeleccionadoNombre || 'Seleccione el Rol del empleado' }}</span>
+          <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
     </div>
 
     <!-- Botón guardar -->
     <div class="guardar-container">
-      <ion-button 
-        expand="block" 
+      <ion-button
+        expand="block"
         class="guardar-button"
         (click)="guardarEmpleado()"
         [disabled]="loading">
@@ -107,3 +107,41 @@
     </div>
   </div>
 </ion-content>
+
+<!-- Modal de Roles -->
+<ion-modal #modalRoles [isOpen]="modalRolesAbierto" (didDismiss)="cerrarModalRoles()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar style="--background: #001E87; --color: white;">
+        <ion-title>Seleccionar Rol</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModalRoles()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <!-- Lista de roles -->
+      <ion-list>
+        <ion-item
+          *ngFor="let rol of roles"
+          button
+          (click)="seleccionarRol(rol)"
+          [class.selected-item]="empleado.rol === rol.value">
+          <ion-icon name="shield-checkmark" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h2>{{ rol.label }}</h2>
+          </ion-label>
+          <ion-icon
+            *ngIf="empleado.rol === rol.value"
+            name="checkmark-circle"
+            slot="end"
+            color="primary">
+          </ion-icon>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { IonModal } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
 
 @Component({
@@ -11,9 +12,13 @@ import { SupabaseService } from '../../services/supabase';
 })
 export class CrearEmpleadoPage implements OnInit {
 
+  @ViewChild('modalRoles', { static: false }) modalRoles!: IonModal;
+
   esEdicion: boolean = false;
   empleadoId: string = '';
   loading = false;
+  modalRolesAbierto: boolean = false;
+  rolSeleccionadoNombre: string = '';
 
   empleado = {
     nombre: '',
@@ -41,7 +46,7 @@ export class CrearEmpleadoPage implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.empleadoId = params.get('id') || '';
       this.esEdicion = !!this.empleadoId;
-      
+
       if (this.esEdicion) {
         this.cargarEmpleado();
       }
@@ -52,7 +57,7 @@ export class CrearEmpleadoPage implements OnInit {
     try {
       const empleados = await this.supabaseService.getEmpleados();
       const empleadoData = empleados.find(e => e.id == this.empleadoId);
-      
+
       if (empleadoData) {
         this.empleado = {
           nombre: empleadoData.nombre,
@@ -60,9 +65,15 @@ export class CrearEmpleadoPage implements OnInit {
           ci: empleadoData.ci || '',
           direccion: empleadoData.direccion || '',
           usuario: empleadoData.usuario,
-          contrasena: '', // No mostrar contraseña por seguridad
+          contrasena: '',
           rol: empleadoData.rol
         };
+
+        // Establecer nombre del rol seleccionado
+        const rolSeleccionado = this.roles.find(r => r.value === empleadoData.rol);
+        if (rolSeleccionado) {
+          this.rolSeleccionadoNombre = rolSeleccionado.label;
+        }
       }
     } catch (error) {
       console.error('Error cargando empleado:', error);
@@ -71,6 +82,21 @@ export class CrearEmpleadoPage implements OnInit {
 
   volver() {
     this.location.back();
+  }
+
+  // Funciones para el modal de roles
+  abrirModalRoles() {
+    this.modalRolesAbierto = true;
+  }
+
+  cerrarModalRoles() {
+    this.modalRolesAbierto = false;
+  }
+
+  seleccionarRol(rol: any) {
+    this.empleado.rol = rol.value;
+    this.rolSeleccionadoNombre = rol.label;
+    this.cerrarModalRoles();
   }
 
   async guardarEmpleado() {

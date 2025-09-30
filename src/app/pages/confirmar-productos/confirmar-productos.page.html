@@ -68,14 +68,36 @@
     </div>
   </div>
 
-  <!-- Botón Confirmar -->
-  <div class="confirmar-container">
+  <!-- Concepto de la venta -->
+  <div class="concepto-container">
+    <ion-label class="concepto-label">Concepto:</ion-label>
+    <div class="concepto-texto">{{ conceptoVenta }}</div>
+  </div>
+
+  <!-- Total a pagar -->
+  <div class="total-container">
+    <div class="total-label">Total a Pagar:</div>
+    <div class="total-amount">{{ calcularTotal() }} Bs.</div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="acciones-container">
+    <ion-button
+      expand="block"
+      fill="outline"
+      class="agregar-mas-button"
+      (click)="agregarMasProductos()">
+      <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+      Agregar Más Productos
+    </ion-button>
+
     <ion-button
       expand="block"
       class="confirmar-button"
       (click)="confirmarVenta()"
-      [disabled]="productosCarrito.length === 0">
-      Confirmar
+      [disabled]="productosCarrito.length === 0 || loading">
+      <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+      <span *ngIf="!loading">Confirmar Venta</span>
     </ion-button>
   </div>
 </ion-content>

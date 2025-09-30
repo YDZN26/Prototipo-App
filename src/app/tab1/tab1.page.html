@@ -1,51 +1,43 @@
 <ion-header [translucent]="true">
   <ion-toolbar style="--background: #001E87; --color: white;">
     <ion-buttons slot="start">
-      <!-- SOLO CAMBIAR ESTA LÍNEA - Agregar (click) y icono -->
       <ion-button fill="clear" (click)="mostrarOpcionesUsuario($event)">
         <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
-        <ion-label>{{ nombreUsuario }}</ion-label>
+        <!-- Ocultar label en móvil, mostrar solo en tablet/desktop -->
+        <ion-label class="user-label-desktop">{{ nombreUsuario }}</ion-label>
         <ion-icon name="chevron-down-outline" slot="end" size="small"></ion-icon>
       </ion-button>
     </ion-buttons>
+
+    <!-- Título con la fecha actual -->
+    <ion-title class="fecha-titulo">{{ tituloFecha }}</ion-title>
+
     <ion-buttons slot="end">
       <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
         <ion-icon name="search-outline"></ion-icon>
       </ion-button>
+      <ion-button fill="clear" (click)="abrirFiltroFechas()">
+        <ion-icon name="filter-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 
-  <ion-toolbar style="--background: #001E87; --color: white;">
-    <ion-segment scrollable [(ngModel)]="selectedDay" (ionChange)="onDaySelected(selectedDay)">
-      <ion-segment-button
-        *ngFor="let day of days"
-        [value]="day.value"
-        [ngClass]="{ 'selected-date': day.value === selectedDay }">
-          {{ day.label }}
-        </ion-segment-button>
-      </ion-segment>    
-      <ion-buttons slot="end">
-        <ion-button id="abrirCalendario">
-          <ion-icon name="calendar-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
+  <!-- Resto del HTML igual... -->
 
-    <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
-      <ion-searchbar
-        placeholder="Buscar ventas..."
-        [(ngModel)]="textoBusqueda"
-        (ionInput)="filtrarItems()"
-        debounce="300">
-      </ion-searchbar>
-    </ion-toolbar>
+  <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
+    <ion-searchbar
+      placeholder="Buscar ventas..."
+      [(ngModel)]="textoBusqueda"
+      (ionInput)="filtrarItems()"
+      debounce="300">
+    </ion-searchbar>
+  </ion-toolbar>
 </ion-header>
 
-<!-- El resto del código HTML permanece igual -->
 <ion-content [fullscreen]="true" class="dashboard-content">
   <!-- Sales Summary - FIJO -->
   <div class="sales-summary-fixed">
-    <h3>Ventas de Hoy</h3>
+    <h3>{{ tituloResumen }}</h3>
     <div class="sales-row">
       <span>Efectivo:</span>
       <span class="amount">{{ salesData.efectivo }} Bs.</span>
@@ -77,13 +69,19 @@
           <strong>{{ product.price }} Bs.</strong>
         </div>
       </ion-item>
+
+      <!-- Mensaje cuando no hay ventas -->
+      <div *ngIf="filteredProducts.length === 0" class="no-ventas">
+        <ion-icon name="calendar-outline" size="large"></ion-icon>
+        <p>No hay ventas en este período</p>
+      </div>
     </ion-list>
   </div>
 
-  <!-- Register Sale Button -->
-  <div class="register-sale-container">
-    <ion-button 
-      expand="block" 
+  <!-- Register Sale Button - Solo se muestra si estamos viendo HOY -->
+  <div class="register-sale-container" *ngIf="mostrandoHoy">
+    <ion-button
+      expand="block"
       class="register-sale-button"
       (click)="registerSale()">
       Registrar Venta
@@ -91,23 +89,71 @@
   </div>
 </ion-content>
 
-<ion-modal #modalCalendario trigger="abrirCalendario">
+<!-- Modal para seleccionar rango de fechas -->
+<ion-modal #modalFiltroFechas>
   <ng-template>
     <ion-header>
       <ion-toolbar style="--background: #001E87; --color: white;">
-        <ion-title>Selecciona una fecha</ion-title>
+        <ion-title>Filtrar Ventas</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="modalCalendario.dismiss()">Cerrar</ion-button>
+          <ion-button (click)="modalFiltroFechas.dismiss()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="calendar-modal-dark">
-      <ion-datetime
-        presentation="date"
-        [value]="fechaActualISO"
-        (ionChange)="seleccionarFechaDesdeCalendario($event); modalCalendario.dismiss();"
-        class="calendar-datetime-dark">
-      </ion-datetime>
+    <ion-content class="modal-filtro-content">
+      <!-- Opciones rápidas -->
+      <div class="filtros-rapidos">
+        <h3>Filtros Rápidos</h3>
+        <ion-button expand="block" fill="outline" (click)="filtrarHoy(); modalFiltroFechas.dismiss()">
+          <ion-icon name="today-outline" slot="start"></ion-icon>
+          Hoy
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="filtrarAyer(); modalFiltroFechas.dismiss()">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          Ayer
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="filtrarEstaSemana(); modalFiltroFechas.dismiss()">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          Esta Semana
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="filtrarEsteMes(); modalFiltroFechas.dismiss()">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          Este Mes
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="filtrarMesAnterior(); modalFiltroFechas.dismiss()">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          Mes Anterior
+        </ion-button>
+      </div>
+
+      <!-- Rango personalizado -->
+      <div class="rango-personalizado">
+        <h3>Rango Personalizado</h3>
+        <ion-item>
+          <ion-label position="stacked">Fecha Inicio</ion-label>
+          <ion-datetime
+            presentation="date"
+            [(ngModel)]="fechaInicioPersonalizada"
+            locale="es-ES">
+          </ion-datetime>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Fecha Fin</ion-label>
+          <ion-datetime
+            presentation="date"
+            [(ngModel)]="fechaFinPersonalizada"
+            locale="es-ES">
+          </ion-datetime>
+        </ion-item>
+        <ion-button
+          expand="block"
+          (click)="aplicarFiltroPersonalizado(); modalFiltroFechas.dismiss()"
+          style="margin-top: 20px;">
+          Aplicar Filtro
+        </ion-button>
+      </div>
     </ion-content>
   </ng-template>
 </ion-modal>
