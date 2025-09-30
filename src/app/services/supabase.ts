@@ -84,43 +84,45 @@ export class SupabaseService {
     if (error) throw error;
   }
 
-  // CLIENTES
-  async getClientes() {
-    const { data, error } = await this.supabase
-      .from('clientes')
-      .select('*')
-      .order('created_at', { ascending: false });
+  // CLIENTES - Métodos actualizados
+async getClientes() {
+  const { data, error } = await this.supabase
+    .from('clientes')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data;
-  }
+  if (error) throw error;
+  return data;
+}
 
-  async createCliente(cliente: any) {
-    const { data, error } = await this.supabase
-      .from('clientes')
-      .insert([{
-        nombre: cliente.nombre,
-        telefono: cliente.telefono
-      }])
-      .select();
+async createCliente(cliente: any) {
+  const { data, error } = await this.supabase
+    .from('clientes')
+    .insert([{
+      nombre: cliente.nombre,
+      telefono: cliente.telefono,
+      ci: cliente.ci || null // AGREGAR CI
+    }])
+    .select();
 
-    if (error) throw error;
-    return data;
-  }
+  if (error) throw error;
+  return data;
+}
 
-  async updateCliente(id: number, cliente: any) {
-    const { data, error } = await this.supabase
-      .from('clientes')
-      .update({
-        nombre: cliente.nombre,
-        telefono: cliente.telefono
-      })
-      .eq('id', id)
-      .select();
+async updateCliente(id: number, cliente: any) {
+  const { data, error } = await this.supabase
+    .from('clientes')
+    .update({
+      nombre: cliente.nombre,
+      telefono: cliente.telefono,
+      ci: cliente.ci || null // AGREGAR CI
+    })
+    .eq('id', id)
+    .select();
 
-    if (error) throw error;
-    return data;
-  }
+  if (error) throw error;
+  return data;
+}
 
   // EMPLEADOS
   async getEmpleados() {

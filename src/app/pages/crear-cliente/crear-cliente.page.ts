@@ -17,7 +17,8 @@ export class CrearClientePage implements OnInit {
 
   cliente = {
     nombre: '',
-    telefono: ''
+    telefono: '',
+    ci: '' // AGREGAR CI
   };
 
   constructor(
@@ -31,7 +32,7 @@ export class CrearClientePage implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.clienteId = params.get('id') || '';
       this.esEdicion = !!this.clienteId;
-      
+
       if (this.esEdicion) {
         this.cargarCliente();
       }
@@ -42,11 +43,12 @@ export class CrearClientePage implements OnInit {
     try {
       const clientes = await this.supabaseService.getClientes();
       const clienteData = clientes.find(c => c.id == this.clienteId);
-      
+
       if (clienteData) {
         this.cliente = {
           nombre: clienteData.nombre,
-          telefono: clienteData.telefono || ''
+          telefono: clienteData.telefono || '',
+          ci: clienteData.ci || '' // AGREGAR CI
         };
       }
     } catch (error) {
@@ -89,6 +91,11 @@ export class CrearClientePage implements OnInit {
 
     if (!this.cliente.telefono.trim()) {
       alert('El teléfono del cliente es requerido');
+      return false;
+    }
+
+    if (!this.cliente.ci.trim()) { // VALIDAR CI
+      alert('La cédula de identidad del cliente es requerida');
       return false;
     }
 

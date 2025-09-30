@@ -34,12 +34,23 @@
           class="custom-input">
         </ion-input>
       </div>
+
+      <!-- C.I. Cliente - NUEVO -->
+      <div class="input-group">
+        <ion-label class="input-label">C.I. Cliente</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Ingrese la cédula de identidad del cliente"
+          [(ngModel)]="cliente.ci"
+          class="custom-input">
+        </ion-input>
+      </div>
     </div>
 
     <!-- Botón guardar -->
     <div class="guardar-container">
-      <ion-button 
-          expand="block" 
+      <ion-button
+          expand="block"
           class="guardar-button"
           (click)="guardarCliente()"
           [disabled]="loading">
