@@ -14,8 +14,6 @@ export class ConfirmarProductosPage implements OnInit {
   productosCarrito: any[] = [];
   conceptoVenta: string = '';
   loading: boolean = false;
-
-  // Datos de la venta temporal
   ventaTemporal: any = null;
 
   constructor(
@@ -26,21 +24,20 @@ export class ConfirmarProductosPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Recuperar datos de venta temporal del localStorage
     const ventaTemp = localStorage.getItem('ventaTemporal');
     if (ventaTemp) {
       this.ventaTemporal = JSON.parse(ventaTemp);
     }
 
-    // Obtener productos seleccionados
     this.route.queryParams.subscribe(params => {
       if (params['productos']) {
         this.productosCarrito = JSON.parse(params['productos']);
-        // Asegurar que cada producto tenga las propiedades necesarias
         this.productosCarrito.forEach(producto => {
           if (!producto.cantidad) producto.cantidad = 1;
           if (!producto.precioUnitario) producto.precioUnitario = producto.precio || 0;
           if (!producto.stock) producto.stock = 10;
+          producto.cantidadTexto = producto.cantidad.toString();
+          producto.cantidadInvalida = false;
         });
         this.actualizarConcepto();
       }
@@ -52,19 +49,102 @@ export class ConfirmarProductosPage implements OnInit {
   }
 
   incrementarCantidad(index: number) {
-    if (this.productosCarrito[index].cantidad < this.productosCarrito[index].stock) {
-      this.productosCarrito[index].cantidad++;
+    const producto = this.productosCarrito[index];
+    if (producto.cantidad < producto.stock) {
+      producto.cantidad++;
+      producto.cantidadTexto = producto.cantidad.toString();
+      producto.cantidadInvalida = false;
       this.actualizarSubtotal(index);
       this.actualizarConcepto();
     }
   }
 
   decrementarCantidad(index: number) {
-    if (this.productosCarrito[index].cantidad > 1) {
-      this.productosCarrito[index].cantidad--;
+    const producto = this.productosCarrito[index];
+    if (producto.cantidad > 1) {
+      producto.cantidad--;
+      producto.cantidadTexto = producto.cantidad.toString();
+      producto.cantidadInvalida = false;
       this.actualizarSubtotal(index);
       this.actualizarConcepto();
     }
+  }
+
+  onCantidadFocus(index: number) {
+    const producto = this.productosCarrito[index];
+    producto.cantidadInvalida = false;
+  }
+
+  onCantidadInput(index: number, event: any) {
+    const producto = this.productosCarrito[index];
+    const textoIngresado = event.target.value;
+    
+    producto.cantidadTexto = textoIngresado;
+    
+    if (!textoIngresado || textoIngresado.trim() === '') {
+      producto.cantidadInvalida = true;
+      return;
+    }
+    
+    const valor = parseInt(textoIngresado);
+    
+    if (isNaN(valor) || valor <= 0) {
+      producto.cantidadInvalida = true;
+      return;
+    }
+    
+    if (valor > producto.stock) {
+      producto.cantidad = producto.stock;
+      producto.cantidadTexto = producto.stock.toString();
+      event.target.value = producto.stock;
+    } else {
+      producto.cantidad = valor;
+    }
+    
+    producto.cantidadInvalida = false;
+    this.actualizarSubtotal(index);
+    this.actualizarConcepto();
+  }
+
+  validarCantidadAlSalir(index: number) {
+    const producto = this.productosCarrito[index];
+    const valor = parseInt(producto.cantidadTexto);
+
+    if (!producto.cantidadTexto || producto.cantidadTexto.trim() === '' || isNaN(valor) || valor <= 0) {
+      producto.cantidadInvalida = true;
+      producto.cantidad = 1;
+      producto.cantidadTexto = '1';
+      this.actualizarSubtotal(index);
+      this.actualizarConcepto();
+      return;
+    }
+
+    if (valor > producto.stock) {
+      producto.cantidad = producto.stock;
+      producto.cantidadTexto = producto.stock.toString();
+    } else {
+      producto.cantidad = valor;
+      producto.cantidadTexto = valor.toString();
+    }
+
+    producto.cantidadInvalida = false;
+    this.actualizarSubtotal(index);
+    this.actualizarConcepto();
+  }
+
+  validarPrecio(index: number, event: any) {
+    const input = event.target;
+    let valor = parseFloat(input.value);
+    const producto = this.productosCarrito[index];
+
+    if (isNaN(valor) || valor < 0) {
+      valor = 0;
+    }
+
+    valor = Math.round(valor * 100) / 100;
+    producto.precioUnitario = valor;
+    input.value = valor;
+    this.actualizarSubtotal(index);
   }
 
   actualizarSubtotal(index: number) {
@@ -81,6 +161,10 @@ export class ConfirmarProductosPage implements OnInit {
     return this.productosCarrito.reduce((total, producto) => {
       return total + (producto.cantidad * producto.precioUnitario);
     }, 0);
+  }
+
+  hayCantidadesInvalidas(): boolean {
+    return this.productosCarrito.some(p => p.cantidadInvalida);
   }
 
   actualizarConcepto() {
@@ -101,11 +185,29 @@ export class ConfirmarProductosPage implements OnInit {
   }
 
   agregarMasProductos() {
-    // Volver a la página de selección de productos
-    this.router.navigate(['/seleccionar-productos']);
+    this.router.navigate(['/seleccionar-productos'], {
+      queryParams: {
+        carritoActual: JSON.stringify(this.productosCarrito.map(p => ({
+          id: p.id,
+          nombre: p.nombre,
+          stock: p.stock,
+          precio: p.precio,
+          categoria: p.categoria,
+          categoria_id: p.categoria_id,
+          cantidad: p.cantidad,
+          precioUnitario: p.precioUnitario,
+          subtotal: p.subtotal
+        })))
+      }
+    });
   }
 
   async confirmarVenta() {
+    if (this.hayCantidadesInvalidas()) {
+      alert('Por favor corrige las cantidades inválidas antes de confirmar');
+      return;
+    }
+
     if (this.productosCarrito.length === 0) {
       alert('No hay productos en el carrito');
       return;
@@ -119,24 +221,38 @@ export class ConfirmarProductosPage implements OnInit {
     this.loading = true;
 
     try {
-      // Preparar datos de la venta para Supabase
+      // Guardar fecha/hora local SIN ajustes
+      const ahora = new Date();
+      
+      console.log('Fecha local del sistema:', ahora.toString());
+      console.log('Fecha ISO que se guardará:', ahora.toISOString());
+
       const ventaFinal = {
-        fecha: new Date().toISOString(),
+        fecha: ahora.toISOString(), // Guardar la fecha tal cual
         clienteId: parseInt(this.ventaTemporal.clienteId),
         metodoPago: this.ventaTemporal.metodoPago,
         productos: this.productosCarrito,
         total: this.calcularTotal()
       };
 
-      // Crear la venta en Supabase
       const ventaCreada = await this.supabaseService.createVenta(ventaFinal);
-
       console.log('Venta creada exitosamente:', ventaCreada);
 
-      // Limpiar datos temporales
+      try {
+        const productosParaActualizar = this.productosCarrito.map(p => ({
+          id: p.id,
+          cantidad: p.cantidad
+        }));
+
+        await this.supabaseService.updateStockMultiplesProductos(productosParaActualizar);
+        console.log('Stocks actualizados correctamente');
+      } catch (errorStock) {
+        console.error('Error actualizando stocks:', errorStock);
+        alert('Venta registrada correctamente, pero hubo un problema actualizando el inventario.');
+      }
+
       localStorage.removeItem('ventaTemporal');
 
-      // Navegar al detalle de venta
       this.router.navigate(['/detalle-venta'], {
         queryParams: {
           ventaData: JSON.stringify({
@@ -149,6 +265,7 @@ export class ConfirmarProductosPage implements OnInit {
           })
         }
       });
+
     } catch (error) {
       console.error('Error creando venta:', error);
       alert('Error al crear la venta. Intenta nuevamente.');

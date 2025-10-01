@@ -20,7 +20,8 @@ export class DetalleVentaPage implements OnInit {
 
   fechaFormateada: string = '';
   metodoPagoTexto: string = '';
-  nombreEmpleado: string = 'NombreEmpleado';
+  nombreEmpleado: string = '';
+  nombreCliente: string = 'Cliente General';
   loading = false;
 
   constructor(
@@ -31,71 +32,78 @@ export class DetalleVentaPage implements OnInit {
 
   async ngOnInit() {
     this.route.queryParams.subscribe(async params => {
+      // Obtener nombre del empleado desde los parámetros
+      if (params['nombreEmpleado']) {
+        this.nombreEmpleado = params['nombreEmpleado'];
+      } else {
+        // Si no viene en parámetros, obtener del localStorage
+        this.nombreEmpleado = localStorage.getItem('nombreUsuario') || 'Empleado';
+      }
+
       if (params['ventaData']) {
         this.venta = JSON.parse(params['ventaData']);
         
         // Si la venta tiene ID, obtener datos completos de Supabase
         if (this.venta.id) {
-          await this.cargarVentaCompleta(this.venta.id);
+          await this.cargarDatosCompletos();
         } else {
           // Venta nueva, usar datos pasados
+          await this.cargarNombreCliente();
           this.formatearDatos();
         }
       }
     });
   }
 
-  async cargarVentaCompleta(ventaId: number) {
+  async cargarDatosCompletos() {
     this.loading = true;
     try {
-      // Obtener venta completa con empleado
-      const ventaCompleta = await this.supabaseService.getVentaPorId(ventaId);
+      // Cargar nombre del cliente si existe clienteId
+      await this.cargarNombreCliente();
       
-      if (ventaCompleta) {
-        this.venta = {
-          ...this.venta,
-          ...ventaCompleta,
-          productos: ventaCompleta.venta_productos.map((vp: any) => ({
-            id: vp.producto_id,
-            nombre: vp.productos?.nombre || 'Producto',
-            cantidad: vp.cantidad,
-            precioUnitario: vp.precio_unitario,
-            subtotal: vp.subtotal
-          }))
-        };
-
-        // Obtener nombre del empleado
-        if (ventaCompleta.empleado_id) {
-          const empleados = await this.supabaseService.getEmpleados();
-          const empleado = empleados.find(e => e.id === ventaCompleta.empleado_id);
-          this.nombreEmpleado = empleado ? empleado.nombre : 'Empleado Desconocido';
-        }
-      }
-
+      // Formatear los datos
       this.formatearDatos();
     } catch (error) {
-      console.error('Error cargando venta completa:', error);
+      console.error('Error cargando datos completos:', error);
       this.formatearDatos(); // Usar datos disponibles
     } finally {
       this.loading = false;
     }
   }
 
+  async cargarNombreCliente() {
+    const clienteId = this.venta.clienteId || this.venta.cliente_id;
+    
+    if (clienteId) {
+      try {
+        const clientes = await this.supabaseService.getClientes();
+        const cliente = clientes.find(c => c.id === clienteId);
+        this.nombreCliente = cliente ? cliente.nombre : 'Cliente General';
+      } catch (error) {
+        console.error('Error cargando cliente:', error);
+        this.nombreCliente = 'Cliente General';
+      }
+    } else {
+      this.nombreCliente = 'Cliente General';
+    }
+  }
+
   formatearDatos() {
     // Formatear fecha y hora
     const fecha = new Date(this.venta.fecha);
-    const horas = fecha.getHours().toString().padStart(2, '0');
-    const minutos = fecha.getMinutes().toString().padStart(2, '0');
-    const ampm = fecha.getHours() >= 12 ? 'pm' : 'am';
-    const horaFormateada = fecha.getHours() > 12 ? 
-      `${(fecha.getHours() - 12).toString().padStart(2, '0')}:${minutos}` : 
-      `${horas}:${minutos}`;
+    
+    // Formatear hora en formato 12 horas
+    const hora = fecha.toLocaleTimeString('es-BO', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
     
     const dia = fecha.getDate().toString().padStart(2, '0');
     const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
     const año = fecha.getFullYear();
     
-    this.fechaFormateada = `${horaFormateada} ${ampm} | ${dia}/${mes}/${año}`;
+    this.fechaFormateada = `${hora} | ${dia}/${mes}/${año}`;
 
     // Formatear método de pago
     switch (this.venta.metodoPago || this.venta.metodo_pago) {
@@ -110,12 +118,6 @@ export class DetalleVentaPage implements OnInit {
         break;
       default:
         this.metodoPagoTexto = 'No especificado';
-    }
-
-    // Si no tenemos nombre de empleado, usar el del localStorage
-    if (this.nombreEmpleado === 'NombreEmpleado') {
-      const nombreGuardado = localStorage.getItem('nombreUsuario');
-      this.nombreEmpleado = nombreGuardado || 'Empleado';
     }
   }
 

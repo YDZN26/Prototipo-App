@@ -51,94 +51,88 @@ export class Tab1Page {
     this.filtrarHoy();
   }
 
-  // Agregar esta función helper para formatear fecha corta
-private formatearFechaCorta(fecha: Date): string {
-  const dia = fecha.getDate().toString().padStart(2, '0');
-  const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-  return `${dia}/${mes}`;
-}
+  private formatearFechaCorta(fecha: Date): string {
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    return `${dia}/${mes}`;
+  }
 
-// ACTUALIZAR filtrarHoy()
-filtrarHoy() {
-  const hoy = new Date();
-  this.fechaInicioActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 0, 0, 0, 0);
-  this.fechaFinActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+  filtrarHoy() {
+    const hoy = new Date();
+    this.fechaInicioActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 0, 0, 0, 0);
+    this.fechaFinActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
 
-  const fechaCorta = this.formatearFechaCorta(hoy);
-  this.tituloFecha = `HOY - ${fechaCorta}`;
-  this.tituloResumen = 'Ventas de Hoy';
-  this.mostrandoHoy = true;
+    const fechaCorta = this.formatearFechaCorta(hoy);
+    this.tituloFecha = `HOY - ${fechaCorta}`;
+    this.tituloResumen = 'Ventas de Hoy';
+    this.mostrandoHoy = true;
 
-  this.cargarVentas();
-}
+    this.cargarVentas();
+  }
 
-// ACTUALIZAR filtrarAyer()
-filtrarAyer() {
-  const ayer = new Date();
-  ayer.setDate(ayer.getDate() - 1);
+  filtrarAyer() {
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
 
-  this.fechaInicioActual = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 0, 0, 0, 0);
-  this.fechaFinActual = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 23, 59, 59, 999);
+    this.fechaInicioActual = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 0, 0, 0, 0);
+    this.fechaFinActual = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 23, 59, 59, 999);
 
-  const fechaCorta = this.formatearFechaCorta(ayer);
-  this.tituloFecha = `AYER - ${fechaCorta}`;
-  this.tituloResumen = 'Ventas de Ayer';
-  this.mostrandoHoy = false;
+    const fechaCorta = this.formatearFechaCorta(ayer);
+    this.tituloFecha = `AYER - ${fechaCorta}`;
+    this.tituloResumen = 'Ventas de Ayer';
+    this.mostrandoHoy = false;
 
-  this.cargarVentas();
-}
+    this.cargarVentas();
+  }
 
-// ACTUALIZAR filtrarEstaSemana()
-filtrarEstaSemana() {
-  const hoy = new Date();
-  const diaSemana = hoy.getDay();
-  const diferencia = diaSemana === 0 ? 6 : diaSemana - 1;
+  filtrarEstaSemana() {
+    const hoy = new Date();
+    const diaSemana = hoy.getDay();
+    const diferencia = diaSemana === 0 ? 6 : diaSemana - 1;
 
-  const inicioSemana = new Date(hoy);
-  inicioSemana.setDate(hoy.getDate() - diferencia);
-  inicioSemana.setHours(0, 0, 0, 0);
+    const inicioSemana = new Date(hoy);
+    inicioSemana.setDate(hoy.getDate() - diferencia);
+    inicioSemana.setHours(0, 0, 0, 0);
 
-  this.fechaInicioActual = inicioSemana;
-  this.fechaFinActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+    this.fechaInicioActual = inicioSemana;
+    this.fechaFinActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
 
-  const fechaInicioCorta = this.formatearFechaCorta(inicioSemana);
-  const fechaFinCorta = this.formatearFechaCorta(hoy);
-  this.tituloFecha = `SEMANA - ${fechaInicioCorta}/${fechaFinCorta}`;
-  this.tituloResumen = 'Ventas de Esta Semana';
-  this.mostrandoHoy = false;
+    const fechaInicioCorta = this.formatearFechaCorta(inicioSemana);
+    const fechaFinCorta = this.formatearFechaCorta(hoy);
+    this.tituloFecha = `SEMANA - ${fechaInicioCorta}/${fechaFinCorta}`;
+    this.tituloResumen = 'Ventas de Esta Semana';
+    this.mostrandoHoy = false;
 
-  this.cargarVentas();
-}
+    this.cargarVentas();
+  }
 
-// ACTUALIZAR filtrarEsteMes()
-filtrarEsteMes() {
-  const hoy = new Date();
-  this.fechaInicioActual = new Date(hoy.getFullYear(), hoy.getMonth(), 1, 0, 0, 0, 0);
-  this.fechaFinActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+  filtrarEsteMes() {
+    const hoy = new Date();
+    this.fechaInicioActual = new Date(hoy.getFullYear(), hoy.getMonth(), 1, 0, 0, 0, 0);
+    this.fechaFinActual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
 
-  const nombreMes = hoy.toLocaleString('es-BO', { month: 'short' }).toUpperCase();
-  this.tituloFecha = `${nombreMes} ${hoy.getFullYear()}`;
-  this.tituloResumen = `Ventas de ${nombreMes}`;
-  this.mostrandoHoy = false;
+    const nombreMes = hoy.toLocaleString('es-BO', { month: 'short' }).toUpperCase();
+    this.tituloFecha = `${nombreMes} ${hoy.getFullYear()}`;
+    this.tituloResumen = `Ventas de ${nombreMes}`;
+    this.mostrandoHoy = false;
 
-  this.cargarVentas();
-}
+    this.cargarVentas();
+  }
 
-// ACTUALIZAR filtrarMesAnterior()
-filtrarMesAnterior() {
-  const hoy = new Date();
-  const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  filtrarMesAnterior() {
+    const hoy = new Date();
+    const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
 
-  this.fechaInicioActual = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth(), 1, 0, 0, 0, 0);
-  this.fechaFinActual = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth() + 1, 0, 23, 59, 59, 999);
+    this.fechaInicioActual = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth(), 1, 0, 0, 0, 0);
+    this.fechaFinActual = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth() + 1, 0, 23, 59, 59, 999);
 
-  const nombreMes = mesAnterior.toLocaleString('es-BO', { month: 'short' }).toUpperCase();
-  this.tituloFecha = `${nombreMes} ${mesAnterior.getFullYear()}`;
-  this.tituloResumen = `Ventas de ${nombreMes}`;
-  this.mostrandoHoy = false;
+    const nombreMes = mesAnterior.toLocaleString('es-BO', { month: 'short' }).toUpperCase();
+    this.tituloFecha = `${nombreMes} ${mesAnterior.getFullYear()}`;
+    this.tituloResumen = `Ventas de ${nombreMes}`;
+    this.mostrandoHoy = false;
 
-  this.cargarVentas();
-}
+    this.cargarVentas();
+  }
 
   aplicarFiltroPersonalizado() {
     const fechaInicio = new Date(this.fechaInicioPersonalizada);
@@ -170,16 +164,47 @@ filtrarMesAnterior() {
   async cargarVentas() {
     this.loading = true;
     try {
-      const inicioAjustado = new Date(this.fechaInicioActual.getTime() - (4 * 60 * 60 * 1000));
-      const finAjustado = new Date(this.fechaFinActual.getTime() - (4 * 60 * 60 * 1000));
+      // Obtener un rango más amplio de ventas (3 días antes y después)
+      const inicioAmplio = new Date(this.fechaInicioActual);
+      inicioAmplio.setDate(inicioAmplio.getDate() - 1);
+      inicioAmplio.setHours(0, 0, 0, 0);
+      
+      const finAmplio = new Date(this.fechaFinActual);
+      finAmplio.setDate(finAmplio.getDate() + 1);
+      finAmplio.setHours(23, 59, 59, 999);
 
-      const ventas = await this.supabaseService.getVentasPorFecha(
-        inicioAjustado.toISOString(),
-        finAjustado.toISOString()
+      const todasLasVentas = await this.supabaseService.getVentasPorFecha(
+        inicioAmplio.toISOString(),
+        finAmplio.toISOString()
       );
 
-      this.procesarResumenVentas(ventas);
-      this.procesarVentasRecientes(ventas);
+      // Filtrar las ventas por fecha LOCAL (no UTC)
+      const ventasFiltradas = todasLasVentas.filter(venta => {
+        const fechaVenta = new Date(venta.fecha);
+        const diaVenta = fechaVenta.getDate();
+        const mesVenta = fechaVenta.getMonth();
+        const añoVenta = fechaVenta.getFullYear();
+        
+        const diaInicio = this.fechaInicioActual.getDate();
+        const mesInicio = this.fechaInicioActual.getMonth();
+        const añoInicio = this.fechaInicioActual.getFullYear();
+        
+        const diaFin = this.fechaFinActual.getDate();
+        const mesFin = this.fechaFinActual.getMonth();
+        const añoFin = this.fechaFinActual.getFullYear();
+        
+        const fechaVentaSinHora = new Date(añoVenta, mesVenta, diaVenta);
+        const fechaInicioSinHora = new Date(añoInicio, mesInicio, diaInicio);
+        const fechaFinSinHora = new Date(añoFin, mesFin, diaFin);
+        
+        return fechaVentaSinHora >= fechaInicioSinHora && fechaVentaSinHora <= fechaFinSinHora;
+      });
+
+      console.log('Total ventas obtenidas:', todasLasVentas.length);
+      console.log('Ventas después de filtrar:', ventasFiltradas.length);
+
+      this.procesarResumenVentas(ventasFiltradas);
+      this.procesarVentasRecientes(ventasFiltradas);
 
     } catch (error) {
       console.error('Error cargando ventas:', error);
@@ -217,16 +242,19 @@ filtrarMesAnterior() {
 
   procesarVentasRecientes(ventas: any[]) {
     this.recentProducts = ventas.map(venta => {
-      const fechaBD = new Date(venta.fecha);
-      const fechaLocal = new Date(fechaBD.getTime() + (4 * 60 * 60 * 1000));
+      // ✅ SOLUCIÓN: Parsear la fecha directamente sin ajustes
+      // Supabase devuelve timestamps en UTC, pero JavaScript los interpreta en zona local
+      const fechaVenta = new Date(venta.fecha);
 
-      const hora = fechaLocal.toLocaleTimeString('es-BO', {
+      // Formatear hora en formato 12 horas
+      const hora = fechaVenta.toLocaleTimeString('es-BO', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
       });
 
-      const fechaStr = fechaLocal.toLocaleDateString('es-BO', {
+      // Formatear fecha
+      const fechaStr = fechaVenta.toLocaleDateString('es-BO', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
@@ -247,6 +275,7 @@ filtrarMesAnterior() {
           id: venta.id,
           fecha: venta.fecha,
           clienteId: venta.cliente_id,
+          empleado_id: venta.empleado_id, // ✅ NUEVO: Pasar el empleado_id
           metodoPago: venta.metodo_pago,
           total: venta.total,
           productos: productos.map((p: any) => ({
@@ -287,8 +316,8 @@ filtrarMesAnterior() {
   }
 
   registerSale() {
-  this.router.navigate(['/nueva-venta']); 
-}
+    this.router.navigate(['/nueva-venta']); 
+  }
 
   verDetalleVenta(venta: any) {
     this.router.navigate(['/detalle-venta'], {

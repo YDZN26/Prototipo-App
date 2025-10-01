@@ -6,9 +6,10 @@
 
 <ion-content [fullscreen]="true" class="detalle-venta-content">
   <div class="detalle-container">
-    <!-- Título -->
+    <!-- Título con nombre del cliente -->
     <div class="titulo-detalle">
       <h2>Detalle de la venta</h2>
+      <p class="nombre-cliente">{{ nombreCliente }}</p>
     </div>
 
     <!-- Detalle de productos -->
@@ -49,7 +50,7 @@
         
         <div class="info-row">
           <span class="info-label">Empleado</span>
-          <span class="info-value">NombreEmpleado</span>
+          <span class="info-value">{{ nombreEmpleado }}</span>
         </div>
       </div>
     </div>

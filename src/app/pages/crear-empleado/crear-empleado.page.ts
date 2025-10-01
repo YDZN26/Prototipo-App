@@ -19,6 +19,7 @@ export class CrearEmpleadoPage implements OnInit {
   loading = false;
   modalRolesAbierto: boolean = false;
   rolSeleccionadoNombre: string = '';
+  mostrarContrasena: boolean = false;
 
   empleado = {
     nombre: '',
@@ -65,11 +66,10 @@ export class CrearEmpleadoPage implements OnInit {
           ci: empleadoData.ci || '',
           direccion: empleadoData.direccion || '',
           usuario: empleadoData.usuario,
-          contrasena: '',
+          contrasena: empleadoData.contrasena || '',
           rol: empleadoData.rol
         };
 
-        // Establecer nombre del rol seleccionado
         const rolSeleccionado = this.roles.find(r => r.value === empleadoData.rol);
         if (rolSeleccionado) {
           this.rolSeleccionadoNombre = rolSeleccionado.label;
@@ -84,7 +84,23 @@ export class CrearEmpleadoPage implements OnInit {
     this.location.back();
   }
 
-  // Funciones para el modal de roles
+  toggleMostrarContrasena() {
+    this.mostrarContrasena = !this.mostrarContrasena;
+  }
+
+  // ✅ MÉTODO CORREGIDO para validar solo números
+  validarSoloNumeros(event: any) {
+    const input = event.target;
+    const valor = input.value;
+    const soloNumeros = valor.replace(/\D/g, ''); // Elimina todo lo que NO sea dígito
+    
+    if (valor !== soloNumeros) {
+      this.empleado.telefono = soloNumeros;
+      // Forzar actualización en el DOM
+      input.value = soloNumeros;
+    }
+  }
+
   abrirModalRoles() {
     this.modalRolesAbierto = true;
   }

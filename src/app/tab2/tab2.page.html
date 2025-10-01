@@ -1,11 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar style="--background: #001E87; --color: white;">
     <ion-buttons slot="start">
-      <ion-button fill="clear">
+      <ion-button fill="clear" (click)="mostrarOpcionesUsuario($event)">
         <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
-        <ion-label>{{ nombreUsuario }}</ion-label>
+        <ion-label class="user-label-desktop">{{ nombreUsuario }}</ion-label>
+        <ion-icon name="chevron-down-outline" slot="end" size="small"></ion-icon>
       </ion-button>
     </ion-buttons>
+
+    <ion-title class="page-titulo">PRODUCTOS</ion-title>
+
     <ion-buttons slot="end">
       <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
         <ion-icon name="search-outline"></ion-icon>
@@ -45,10 +49,12 @@
 
   <!-- Lista de productos -->
   <div class="productos-lista">
+    <!-- ✅ Solo permitir click si es administrador -->
     <div 
       *ngFor="let producto of filteredProductos" 
       class="producto-item"
-      (click)="editarProducto(producto)">
+      [class.no-clickable]="!isAdmin()"
+      (click)="isAdmin() ? editarProducto(producto) : null">
       <div class="producto-info">
         <div class="producto-nombre">{{ producto.nombre }}</div>
         <div class="producto-stock">{{ producto.stock }} Disponible</div>
@@ -57,8 +63,8 @@
     </div>
   </div>
 
-  <!-- Create Product Button -->
-  <div class="create-product-container">
+  <!-- ✅ Botón solo visible para administradores -->
+  <div class="create-product-container" *ngIf="isAdmin()">
     <ion-button 
       expand="block" 
       class="create-product-button"

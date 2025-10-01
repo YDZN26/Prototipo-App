@@ -50,6 +50,39 @@
   font-size: 16px;
 }
 
+// ✅ CONTENEDOR MEJORADO para contraseña con botón
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  ion-input {
+    flex: 1;
+    padding-right: 48px; // Espacio para el botón
+  }
+
+  .eye-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 48px;
+    margin: 0;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --color: #666;
+    z-index: 10;
+
+    ion-icon {
+      font-size: 24px;
+    }
+
+    &:hover {
+      --color: #2979FF;
+    }
+  }
+}
+
 // Botón para seleccionar rol
 .select-rol-button {
   --border-width: 1px;

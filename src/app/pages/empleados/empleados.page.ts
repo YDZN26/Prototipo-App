@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
 
 @Component({
@@ -10,7 +11,7 @@ import { SupabaseService } from '../../services/supabase';
 })
 export class EmpleadosPage implements OnInit {
 
-  nombreUsuario: string = 'NombreUsuario';
+  nombreUsuario: string = 'Usuario';
   mostrarCampoBusqueda = false;
   textoBusqueda: string = '';
 
@@ -20,10 +21,17 @@ export class EmpleadosPage implements OnInit {
 
   constructor(
     private router: Router,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
+    // Cargar nombre del usuario
+    const nombreGuardado = localStorage.getItem('nombreUsuario');
+    if (nombreGuardado) {
+      this.nombreUsuario = nombreGuardado;
+    }
+    
     await this.cargarEmpleados();
   }
 
@@ -61,6 +69,59 @@ export class EmpleadosPage implements OnInit {
 
   crearEmpleado() {
     this.router.navigate(['/crear-empleado']);
+  }
+
+  async mostrarOpcionesUsuario(event: any) {
+    const alert = await this.alertController.create({
+      header: this.nombreUsuario,
+      message: '¿Qué deseas hacer?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Cerrar Sesión',
+          cssClass: 'danger',
+          handler: () => {
+            this.confirmarCerrarSesion();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async confirmarCerrarSesion() {
+    const alert = await this.alertController.create({
+      header: 'Cerrar Sesión',
+      message: '¿Estás seguro que deseas cerrar sesión?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Cerrar Sesión',
+          cssClass: 'danger',
+          handler: () => {
+            this.cerrarSesion();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  cerrarSesion() {
+    localStorage.removeItem('nombreUsuario');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    this.router.navigate(['/login']);
   }
 
   async ionViewWillEnter() {

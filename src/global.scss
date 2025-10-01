@@ -37,3 +37,30 @@
 @import "@ionic/angular/css/palettes/dark.system.css";
 
 
+// Estilos para ion-datetime en modales
+ion-datetime {
+  --background: #ffffff;
+  color: #333333;
+  
+  .calendar-day,
+  .calendar-day-today,
+  .calendar-month-year {
+    color: #333333 !important;
+  }
+}
+
+// Alternativa más específica si lo anterior no funciona
+ion-modal ion-datetime {
+  button {
+    color: #333333 !important;
+  }
+  
+  .datetime-text {
+    color: #333333 !important;
+  }
+  
+  .calendar-day {
+    color: #333333 !important;
+  }
+
+}

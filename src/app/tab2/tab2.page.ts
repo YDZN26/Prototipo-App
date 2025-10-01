@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../services/supabase';
 
 @Component({
@@ -10,7 +11,7 @@ import { SupabaseService } from '../services/supabase';
 })
 export class Tab2Page implements OnInit {
 
-  nombreUsuario: string = 'NombreUsuario';
+  nombreUsuario: string = 'Usuario';
   mostrarCampoBusqueda = false;
   textoBusqueda: string = '';
 
@@ -21,24 +22,33 @@ export class Tab2Page implements OnInit {
 
   constructor(
     private router: Router,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
+    const nombreGuardado = localStorage.getItem('nombreUsuario');
+    if (nombreGuardado) {
+      this.nombreUsuario = nombreGuardado;
+    }
+    
     await this.cargarDatos();
+  }
+
+  // ✅ AGREGAR este método
+  isAdmin(): boolean {
+    return localStorage.getItem('userRole') === 'administrador';
   }
 
   async cargarDatos() {
     this.loading = true;
     try {
-      // Cargar categorías
       const categoriasData = await this.supabaseService.getCategorias();
       this.categorias = [
         { id: 0, nombre: 'Todas las categorías', selected: true },
         ...categoriasData.map(cat => ({ ...cat, selected: false }))
       ];
 
-      // Cargar productos
       await this.cargarProductos();
     } catch (error) {
       console.error('Error cargando datos:', error);
@@ -65,19 +75,14 @@ export class Tab2Page implements OnInit {
   }
 
   seleccionarCategoria(categoriaSeleccionada: any) {
-    // Desseleccionar todas las categorías
     this.categorias.forEach(cat => cat.selected = false);
-    
-    // Seleccionar la categoría clickeada
     categoriaSeleccionada.selected = true;
-    
     this.filtrarProductos();
   }
 
   filtrarProductos() {
     let productosTemp = this.productos;
 
-    // Filtrar por categoría
     const categoriaActiva = this.categorias.find(cat => cat.selected);
     if (categoriaActiva && categoriaActiva.id !== 0) {
       productosTemp = productosTemp.filter(producto => 
@@ -85,7 +90,6 @@ export class Tab2Page implements OnInit {
       );
     }
 
-    // Filtrar por búsqueda de texto
     if (this.textoBusqueda.trim() !== '') {
       const texto = this.textoBusqueda.toLowerCase();
       productosTemp = productosTemp.filter(producto =>
@@ -97,6 +101,11 @@ export class Tab2Page implements OnInit {
   }
 
   editarProducto(producto: any) {
+    // ✅ AGREGAR validación de rol antes de editar
+    if (!this.isAdmin()) {
+      alert('No tienes permisos para editar productos');
+      return;
+    }
     this.router.navigate(['/editar-producto', producto.id]);
   }
 
@@ -104,8 +113,60 @@ export class Tab2Page implements OnInit {
     this.router.navigate(['/crear-producto']);
   }
 
+  async mostrarOpcionesUsuario(event: any) {
+    const alert = await this.alertController.create({
+      header: this.nombreUsuario,
+      message: '¿Qué deseas hacer?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Cerrar Sesión',
+          cssClass: 'danger',
+          handler: () => {
+            this.confirmarCerrarSesion();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async confirmarCerrarSesion() {
+    const alert = await this.alertController.create({
+      header: 'Cerrar Sesión',
+      message: '¿Estás seguro que deseas cerrar sesión?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Cerrar Sesión',
+          cssClass: 'danger',
+          handler: () => {
+            this.cerrarSesion();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  cerrarSesion() {
+    localStorage.removeItem('nombreUsuario');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    this.router.navigate(['/login']);
+  }
+
   async ionViewWillEnter() {
-    // Recargar productos cuando se vuelve a la página
     await this.cargarProductos();
   }
 }

@@ -97,6 +97,33 @@ export class CrearProductoPage implements OnInit {
     this.location.back();
   }
 
+  // ✅ NUEVO: Validar que solo se ingresen números positivos (>= 0)
+  validarNumeroPositivo(event: any, campo: string) {
+    const input = event.target;
+    let valor = parseFloat(input.value);
+
+    // Si el valor es negativo o NaN, establecer en 0
+    if (isNaN(valor) || valor < 0) {
+      valor = 0;
+    }
+
+    // Actualizar el valor en el modelo según el campo
+    switch(campo) {
+      case 'cantidad':
+        this.producto.cantidad = Math.floor(valor); // Cantidad debe ser entero
+        input.value = this.producto.cantidad;
+        break;
+      case 'precioUnitario':
+        this.producto.precioUnitario = Math.round(valor * 100) / 100; // Máximo 2 decimales
+        input.value = this.producto.precioUnitario;
+        break;
+      case 'costoUnitario':
+        this.producto.costoUnitario = Math.round(valor * 100) / 100; // Máximo 2 decimales
+        input.value = this.producto.costoUnitario;
+        break;
+    }
+  }
+
   // Gestión de modales de imagen
   mostrarOpcionesImagen() {
     this.modalImagenAbierto = true;
@@ -216,13 +243,18 @@ export class CrearProductoPage implements OnInit {
       return false;
     }
 
-    if (this.producto.cantidad <= 0) {
-      this.mostrarAlerta('Error', 'La cantidad debe ser mayor a 0');
+    if (this.producto.cantidad < 0) {
+      this.mostrarAlerta('Error', 'La cantidad no puede ser negativa');
       return false;
     }
 
-    if (this.producto.precioUnitario <= 0) {
-      this.mostrarAlerta('Error', 'El precio unitario debe ser mayor a 0');
+    if (this.producto.precioUnitario < 0) {
+      this.mostrarAlerta('Error', 'El precio unitario no puede ser negativo');
+      return false;
+    }
+
+    if (this.producto.costoUnitario < 0) {
+      this.mostrarAlerta('Error', 'El costo unitario no puede ser negativo');
       return false;
     }
 

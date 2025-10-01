@@ -18,7 +18,7 @@ export class CrearClientePage implements OnInit {
   cliente = {
     nombre: '',
     telefono: '',
-    ci: '' // AGREGAR CI
+    ci: ''
   };
 
   constructor(
@@ -48,7 +48,7 @@ export class CrearClientePage implements OnInit {
         this.cliente = {
           nombre: clienteData.nombre,
           telefono: clienteData.telefono || '',
-          ci: clienteData.ci || '' // AGREGAR CI
+          ci: clienteData.ci || ''
         };
       }
     } catch (error) {
@@ -58,6 +58,19 @@ export class CrearClientePage implements OnInit {
 
   volver() {
     this.location.back();
+  }
+
+  // ✅ NUEVO: Validar que solo se ingresen números en teléfono
+  validarSoloNumeros(event: any) {
+    const input = event.target;
+    const valor = input.value;
+    const soloNumeros = valor.replace(/\D/g, ''); // Elimina todo lo que NO sea dígito
+    
+    if (valor !== soloNumeros) {
+      this.cliente.telefono = soloNumeros;
+      // Forzar actualización en el DOM
+      input.value = soloNumeros;
+    }
   }
 
   async guardarCliente() {
@@ -94,7 +107,7 @@ export class CrearClientePage implements OnInit {
       return false;
     }
 
-    if (!this.cliente.ci.trim()) { // VALIDAR CI
+    if (!this.cliente.ci.trim()) {
       alert('La cédula de identidad del cliente es requerida');
       return false;
     }

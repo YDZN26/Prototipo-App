@@ -1,11 +1,17 @@
 <ion-header [translucent]="true">
   <ion-toolbar style="--background: #001E87; --color: white;">
     <ion-buttons slot="start">
-      <ion-button fill="clear">
+      <ion-button fill="clear" (click)="mostrarOpcionesUsuario($event)">
         <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
-        <ion-label>{{ nombreUsuario }}</ion-label>
+        <!-- Ocultar label en móvil, mostrar solo en tablet/desktop -->
+        <ion-label class="user-label-desktop">{{ nombreUsuario }}</ion-label>
+        <ion-icon name="chevron-down-outline" slot="end" size="small"></ion-icon>
       </ion-button>
     </ion-buttons>
+
+    <!-- Título -->
+    <ion-title class="page-titulo">Proveedores</ion-title>
+
     <ion-buttons slot="end">
       <ion-button fill="clear" (click)="mostrarCampoBusqueda = !mostrarCampoBusqueda">
         <ion-icon name="search-outline"></ion-icon>

@@ -1,7 +1,7 @@
 .confirmar-productos-content {
   --background: #f5f5f5;
   --padding-top: 20px;
-  --padding-bottom: 180px; // Más espacio para los botones
+  --padding-bottom: 180px;
 }
 
 // Lista de productos en el carrito
@@ -42,7 +42,7 @@
     .producto-controls {
       display: flex;
       justify-content: space-between;
-      gap: 20px;
+      gap: 15px;
       margin-bottom: 10px;
 
       .cantidad-control,
@@ -60,60 +60,85 @@
         .cantidad-buttons {
           display: flex;
           align-items: center;
-          gap: 10px;
+          justify-content: center;
+          gap: 8px;
           background: white;
           border-radius: 25px;
-          padding: 5px;
+          padding: 5px 10px;
+          height: 45px;
 
           .cantidad-btn {
             --background: transparent;
             --color: #333;
-            --padding-start: 8px;
-            --padding-end: 8px;
+            --padding-start: 4px;
+            --padding-end: 4px;
             --min-height: 35px;
             --border-radius: 50%;
             margin: 0;
+            flex-shrink: 0;
 
             ion-icon {
               font-size: 18px;
             }
+
+            &[disabled] {
+              --color: #ccc;
+            }
           }
 
-          .cantidad-display {
+          .cantidad-input {
+            --background: transparent;
+            --color: #333;
+            --padding-start: 0;
+            --padding-end: 0;
             font-size: 16px;
             font-weight: 600;
-            color: #333;
-            min-width: 30px;
             text-align: center;
+            width: 50px;
+            flex-shrink: 0;
+
+            // ✅ Estado inválido
+            &.cantidad-invalida {
+              --color: #e53e3e;
+            }
           }
         }
 
+        // ✅ Mensaje de error
+        .cantidad-error {
+          color: #e53e3e;
+          font-size: 12px;
+          font-weight: 500;
+          margin-top: 5px;
+          text-align: center;
+        }
+
+        .precio-input-wrapper {
+          position: relative;
+          background: white;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+          display: flex;
+          align-items: center;
+          height: 45px;
+        }
+
         .precio-input {
-          --background: white;
+          --background: transparent;
           --color: #333;
           --padding-start: 12px;
-          --padding-end: 40px;
-          --border-radius: 8px;
-          --border-color: #ddd;
-          --border-style: solid;
-          --border-width: 1px;
-          --min-height: 40px;
+          --padding-end: 45px;
           font-size: 14px;
+          flex: 1;
         }
 
         .precio-suffix {
           position: absolute;
           right: 12px;
-          top: 50%;
-          transform: translateY(-50%);
           color: #666;
           font-size: 14px;
           pointer-events: none;
         }
-      }
-
-      .precio-control {
-        position: relative;
       }
     }
 
@@ -121,7 +146,7 @@
       text-align: center;
       font-size: 12px;
       color: #666;
-      margin-top: 5px;
+      margin-top: 8px;
     }
   }
 }

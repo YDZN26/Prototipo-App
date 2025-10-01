@@ -15,7 +15,7 @@
     <div class="form-section">
       <!-- Nombre del cliente -->
       <div class="input-group">
-        <ion-label class="input-label">NombreCliente</ion-label>
+        <ion-label class="input-label">Nombre Cliente</ion-label>
         <ion-input
           type="text"
           placeholder="Ingrese el nombre del cliente"
@@ -24,18 +24,20 @@
         </ion-input>
       </div>
 
-      <!-- Número de teléfono -->
+      <!-- Número de teléfono - SOLO NÚMEROS -->
       <div class="input-group">
         <ion-label class="input-label">Número Teléfono:</ion-label>
         <ion-input
-          type="tel"
+          type="text"
+          inputmode="numeric"
           placeholder="Ingrese el número de teléfono del cliente"
           [(ngModel)]="cliente.telefono"
+          (ionInput)="validarSoloNumeros($event)"
           class="custom-input">
         </ion-input>
       </div>
 
-      <!-- C.I. Cliente - NUEVO -->
+      <!-- C.I. Cliente -->
       <div class="input-group">
         <ion-label class="input-label">C.I. Cliente</ion-label>
         <ion-input
@@ -50,13 +52,13 @@
     <!-- Botón guardar -->
     <div class="guardar-container">
       <ion-button
-          expand="block"
-          class="guardar-button"
-          (click)="guardarCliente()"
-          [disabled]="loading">
-          <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
-          {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Cliente' : 'Guardar Cliente') }}
-        </ion-button>
+        expand="block"
+        class="guardar-button"
+        (click)="guardarCliente()"
+        [disabled]="loading">
+        <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+        {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Cliente' : 'Guardar Cliente') }}
+      </ion-button>
     </div>
   </div>
 </ion-content>

@@ -25,7 +25,34 @@ export class SeleccionarProductosPage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    // ✅ NUEVO: Cargar productos del carrito actual si existen
+    this.cargarCarritoActual();
     await this.cargarDatos();
+  }
+
+  // ✅ NUEVO: Cargar el estado actual del carrito
+  cargarCarritoActual() {
+    this.route.queryParams.subscribe(params => {
+      if (params['carritoActual']) {
+        try {
+          const carritoActual = JSON.parse(params['carritoActual']);
+          // Restaurar productos seleccionados con sus cantidades actuales
+          this.productosSeleccionados = carritoActual.map((item: any) => ({
+            id: item.id,
+            nombre: item.nombre,
+            stock: item.stock,
+            precio: item.precioUnitario, // Usar el precio actual del carrito
+            categoria: item.categoria,
+            categoria_id: item.categoria_id,
+            cantidad: item.cantidad, // ✅ Mantener la cantidad actual
+            precioUnitario: item.precioUnitario,
+            subtotal: item.subtotal
+          }));
+        } catch (error) {
+          console.error('Error al cargar carrito actual:', error);
+        }
+      }
+    });
   }
 
   async cargarDatos() {
@@ -41,7 +68,7 @@ export class SeleccionarProductosPage implements OnInit {
       // Cargar productos con stock disponible
       const productosData = await this.supabaseService.getProductos();
       this.productos = productosData
-        .filter(producto => producto.stock > 0) // Solo productos con stock
+        .filter(producto => producto.stock > 0)
         .map(producto => ({
           id: producto.id,
           nombre: producto.nombre,
@@ -88,8 +115,10 @@ export class SeleccionarProductosPage implements OnInit {
     const index = this.productosSeleccionados.findIndex(p => p.id === producto.id);
     
     if (index > -1) {
+      // ✅ Deseleccionar producto
       this.productosSeleccionados.splice(index, 1);
     } else {
+      // ✅ Seleccionar producto nuevo (siempre con cantidad 1)
       this.productosSeleccionados.push({
         ...producto,
         cantidad: 1,

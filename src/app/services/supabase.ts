@@ -49,7 +49,7 @@ export class SupabaseService {
         costo: producto.costoUnitario,
         stock: producto.cantidad,
         categoria_id: producto.categoria,
-        imagen_url: producto.imagenUrl || null // AGREGADO
+        imagen_url: producto.imagenUrl || null
       }])
       .select();
 
@@ -66,7 +66,7 @@ export class SupabaseService {
         costo: producto.costoUnitario,
         stock: producto.cantidad,
         categoria_id: producto.categoria,
-        imagen_url: producto.imagenUrl || null // AGREGADO
+        imagen_url: producto.imagenUrl || null
       })
       .eq('id', id)
       .select();
@@ -84,45 +84,98 @@ export class SupabaseService {
     if (error) throw error;
   }
 
-  // CLIENTES - Métodos actualizados
-async getClientes() {
-  const { data, error } = await this.supabase
-    .from('clientes')
-    .select('*')
-    .order('created_at', { ascending: false });
+  // ACTUALIZAR STOCK DE UN PRODUCTO
+  async updateStockProducto(productoId: number, cantidadVendida: number) {
+    try {
+      // 1. Obtener el stock actual del producto
+      const { data: productoActual, error: errorGet } = await this.supabase
+        .from('productos')
+        .select('stock')
+        .eq('id', productoId)
+        .single();
 
-  if (error) throw error;
-  return data;
-}
+      if (errorGet) throw errorGet;
 
-async createCliente(cliente: any) {
-  const { data, error } = await this.supabase
-    .from('clientes')
-    .insert([{
-      nombre: cliente.nombre,
-      telefono: cliente.telefono,
-      ci: cliente.ci || null // AGREGAR CI
-    }])
-    .select();
+      // 2. Calcular el nuevo stock
+      const nuevoStock = productoActual.stock - cantidadVendida;
 
-  if (error) throw error;
-  return data;
-}
+      // 3. Validar que no sea negativo
+      if (nuevoStock < 0) {
+        throw new Error(`Stock insuficiente para el producto ID ${productoId}`);
+      }
 
-async updateCliente(id: number, cliente: any) {
-  const { data, error } = await this.supabase
-    .from('clientes')
-    .update({
-      nombre: cliente.nombre,
-      telefono: cliente.telefono,
-      ci: cliente.ci || null // AGREGAR CI
-    })
-    .eq('id', id)
-    .select();
+      // 4. Actualizar el stock en la base de datos
+      const { data, error: errorUpdate } = await this.supabase
+        .from('productos')
+        .update({ stock: nuevoStock })
+        .eq('id', productoId)
+        .select();
 
-  if (error) throw error;
-  return data;
-}
+      if (errorUpdate) throw errorUpdate;
+
+      console.log(`Stock actualizado: Producto ${productoId} | ${productoActual.stock} → ${nuevoStock}`);
+      return data;
+
+    } catch (error) {
+      console.error('Error actualizando stock:', error);
+      throw error;
+    }
+  }
+
+  // ACTUALIZAR STOCK DE MÚLTIPLES PRODUCTOS
+  async updateStockMultiplesProductos(productos: { id: number, cantidad: number }[]) {
+    try {
+      const promesas = productos.map(producto => 
+        this.updateStockProducto(producto.id, producto.cantidad)
+      );
+      
+      await Promise.all(promesas);
+      console.log('Todos los stocks actualizados correctamente');
+    } catch (error) {
+      console.error('Error actualizando stocks múltiples:', error);
+      throw error;
+    }
+  }
+
+  // CLIENTES
+  async getClientes() {
+    const { data, error } = await this.supabase
+      .from('clientes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async createCliente(cliente: any) {
+    const { data, error } = await this.supabase
+      .from('clientes')
+      .insert([{
+        nombre: cliente.nombre,
+        telefono: cliente.telefono,
+        ci: cliente.ci || null
+      }])
+      .select();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async updateCliente(id: number, cliente: any) {
+    const { data, error } = await this.supabase
+      .from('clientes')
+      .update({
+        nombre: cliente.nombre,
+        telefono: cliente.telefono,
+        ci: cliente.ci || null
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data;
+  }
 
   // EMPLEADOS
   async getEmpleados() {
@@ -177,7 +230,7 @@ async updateCliente(id: number, cliente: any) {
     const { data, error } = await this.supabase
       .from('proveedores')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false});
 
     if (error) throw error;
     return data;
