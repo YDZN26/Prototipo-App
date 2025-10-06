@@ -50,7 +50,7 @@
   font-size: 16px;
 }
 
-// ✅ CONTENEDOR MEJORADO para contraseña con botón
+// Contenedor para contraseña con botón
 .password-wrapper {
   position: relative;
   display: flex;
@@ -59,7 +59,7 @@
 
   ion-input {
     flex: 1;
-    padding-right: 48px; // Espacio para el botón
+    padding-right: 48px;
   }
 
   .eye-button {
@@ -124,6 +124,26 @@
     font-size: 16px;
     box-shadow: 0 4px 12px rgba(41, 121, 255, 0.3);
     margin: 0;
+  }
+
+  // Estilos para botón eliminar
+  .eliminar-button {
+    --background: #dc3545;
+    --background-activated: #c82333;
+    --background-hover: #c82333;
+    --color: white;
+    --border-radius: 12px;
+    height: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    margin-top: 15px;
+
+    &[disabled] {
+      --background: #ccc;
+      --color: #666;
+      box-shadow: none;
+    }
   }
 }
 

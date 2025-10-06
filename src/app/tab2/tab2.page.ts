@@ -31,7 +31,7 @@ export class Tab2Page implements OnInit {
     if (nombreGuardado) {
       this.nombreUsuario = nombreGuardado;
     }
-    
+
     await this.cargarDatos();
   }
 
@@ -66,11 +66,20 @@ export class Tab2Page implements OnInit {
         stock: producto.stock,
         precio: producto.precio,
         categoria: producto.categorias?.nombre || 'Sin categoría',
-        categoria_id: producto.categoria_id
+        categoria_id: producto.categoria_id,
+        imagen_url: producto.imagen_url
       }));
       this.filtrarProductos();
     } catch (error) {
       console.error('Error cargando productos:', error);
+    }
+  }
+
+  onImageError(event: any) {
+    event.target.style.display = 'none';
+    const placeholder = event.target.nextElementSibling;
+    if (placeholder) {
+      placeholder.style.display = 'flex';
     }
   }
 
@@ -85,7 +94,7 @@ export class Tab2Page implements OnInit {
 
     const categoriaActiva = this.categorias.find(cat => cat.selected);
     if (categoriaActiva && categoriaActiva.id !== 0) {
-      productosTemp = productosTemp.filter(producto => 
+      productosTemp = productosTemp.filter(producto =>
         producto.categoria_id === categoriaActiva.id
       );
     }

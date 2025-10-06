@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
 
 @Component({
@@ -27,14 +28,15 @@ export class CrearProveedorPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.proveedorId = params.get('id') || '';
       this.esEdicion = !!this.proveedorId;
-      
+
       if (this.esEdicion) {
         this.cargarProveedor();
       }
@@ -45,7 +47,7 @@ export class CrearProveedorPage implements OnInit {
     try {
       const proveedores = await this.supabaseService.getProveedores();
       const proveedorData = proveedores.find(p => p.id == this.proveedorId);
-      
+
       if (proveedorData) {
         this.proveedor = {
           nombre: proveedorData.nombre,
@@ -72,16 +74,14 @@ export class CrearProveedorPage implements OnInit {
     try {
       if (this.esEdicion) {
         await this.supabaseService.updateProveedor(parseInt(this.proveedorId), this.proveedor);
-        console.log('Proveedor actualizado');
       } else {
         await this.supabaseService.createProveedor(this.proveedor);
-        console.log('Proveedor creado');
       }
 
       this.router.navigate(['/tabs/proveedores']);
     } catch (error) {
       console.error('Error guardando proveedor:', error);
-      alert('Error al guardar el proveedor');
+      await this.mostrarAlerta('Error', 'No se pudo guardar el proveedor');
     } finally {
       this.loading = false;
     }
@@ -89,30 +89,88 @@ export class CrearProveedorPage implements OnInit {
 
   validarProveedor(): boolean {
     if (!this.proveedor.nombre.trim()) {
-      alert('El nombre del proveedor es requerido');
+      this.mostrarAlerta('Error', 'El nombre del proveedor es requerido');
       return false;
     }
 
     if (!this.proveedor.telefono.trim()) {
-      alert('El teléfono del proveedor es requerido');
+      this.mostrarAlerta('Error', 'El teléfono del proveedor es requerido');
       return false;
     }
 
     if (!this.proveedor.ci.trim()) {
-      alert('El C.I. del proveedor es requerido');
+      this.mostrarAlerta('Error', 'El C.I. del proveedor es requerido');
       return false;
     }
 
     if (!this.proveedor.direccion.trim()) {
-      alert('La dirección del proveedor es requerida');
+      this.mostrarAlerta('Error', 'La dirección del proveedor es requerida');
       return false;
     }
 
     if (!this.proveedor.ubicacion.trim()) {
-      alert('La ubicación del proveedor es requerida');
+      this.mostrarAlerta('Error', 'La ubicación del proveedor es requerida');
       return false;
     }
 
     return true;
+  }
+
+  // Confirmar eliminación del proveedor
+  async confirmarEliminarProveedor() {
+    const alert = await this.alertController.create({
+      header: '¿Eliminar Proveedor?',
+      message: '¿Estás seguro que deseas eliminar este proveedor? Esta acción no se puede deshacer.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Eliminar',
+          cssClass: 'danger',
+          handler: () => {
+            this.eliminarProveedor();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  // Eliminar proveedor (eliminación lógica)
+  async eliminarProveedor() {
+    this.loading = true;
+
+    try {
+      await this.supabaseService.deleteProveedor(parseInt(this.proveedorId));
+
+      const successAlert = await this.alertController.create({
+        header: 'Proveedor Eliminado',
+        message: 'El proveedor ha sido eliminado exitosamente',
+        buttons: ['OK']
+      });
+
+      await successAlert.present();
+      await successAlert.onDidDismiss();
+
+      this.router.navigate(['/tabs/proveedores']);
+    } catch (error) {
+      console.error('Error eliminando proveedor:', error);
+      await this.mostrarAlerta('Error', 'No se pudo eliminar el proveedor');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertController.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

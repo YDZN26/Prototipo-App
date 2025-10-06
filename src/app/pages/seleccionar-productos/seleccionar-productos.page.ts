@@ -75,7 +75,8 @@ export class SeleccionarProductosPage implements OnInit {
           stock: producto.stock,
           precio: producto.precio,
           categoria: producto.categorias?.nombre || 'Sin categoría',
-          categoria_id: producto.categoria_id
+          categoria_id: producto.categoria_id,
+          imagen_url: producto.imagen_url
         }));
 
       this.filtrarProductos();
@@ -85,6 +86,14 @@ export class SeleccionarProductosPage implements OnInit {
       this.loading = false;
     }
   }
+
+  onImageError(event: any) {
+  event.target.style.display = 'none';
+  const placeholder = event.target.nextElementSibling;
+  if (placeholder) {
+    placeholder.style.display = 'flex';
+  }
+}
 
   volver() {
     this.location.back();
@@ -99,7 +108,7 @@ export class SeleccionarProductosPage implements OnInit {
   filtrarProductos() {
     const categoriaActiva = this.categorias.find(cat => cat.selected);
     if (categoriaActiva && categoriaActiva.id !== 0) {
-      this.filteredProductos = this.productos.filter(producto => 
+      this.filteredProductos = this.productos.filter(producto =>
         producto.categoria_id === categoriaActiva.id
       );
     } else {
@@ -113,7 +122,7 @@ export class SeleccionarProductosPage implements OnInit {
 
   toggleProducto(producto: any) {
     const index = this.productosSeleccionados.findIndex(p => p.id === producto.id);
-    
+
     if (index > -1) {
       // ✅ Deseleccionar producto
       this.productosSeleccionados.splice(index, 1);

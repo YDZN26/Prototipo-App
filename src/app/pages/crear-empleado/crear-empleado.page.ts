@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { IonModal } from '@ionic/angular';
+import { IonModal, AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
 
 @Component({
@@ -40,7 +40,8 @@ export class CrearEmpleadoPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
@@ -88,15 +89,13 @@ export class CrearEmpleadoPage implements OnInit {
     this.mostrarContrasena = !this.mostrarContrasena;
   }
 
-  // ✅ MÉTODO CORREGIDO para validar solo números
   validarSoloNumeros(event: any) {
     const input = event.target;
     const valor = input.value;
-    const soloNumeros = valor.replace(/\D/g, ''); // Elimina todo lo que NO sea dígito
-    
+    const soloNumeros = valor.replace(/\D/g, '');
+
     if (valor !== soloNumeros) {
       this.empleado.telefono = soloNumeros;
-      // Forzar actualización en el DOM
       input.value = soloNumeros;
     }
   }
@@ -123,16 +122,14 @@ export class CrearEmpleadoPage implements OnInit {
     try {
       if (this.esEdicion) {
         await this.supabaseService.updateEmpleado(parseInt(this.empleadoId), this.empleado);
-        console.log('Empleado actualizado');
       } else {
         await this.supabaseService.createEmpleado(this.empleado);
-        console.log('Empleado creado');
       }
 
       this.router.navigate(['/tabs/empleados']);
     } catch (error) {
       console.error('Error guardando empleado:', error);
-      alert('Error al guardar el empleado. Verifica que el usuario no esté duplicado.');
+      await this.mostrarAlerta('Error', 'No se pudo guardar el empleado. Verifica que el usuario no esté duplicado.');
     } finally {
       this.loading = false;
     }
@@ -140,40 +137,98 @@ export class CrearEmpleadoPage implements OnInit {
 
   validarEmpleado(): boolean {
     if (!this.empleado.nombre.trim()) {
-      alert('El nombre del empleado es requerido');
+      this.mostrarAlerta('Error', 'El nombre del empleado es requerido');
       return false;
     }
 
     if (!this.empleado.telefono.trim()) {
-      alert('El teléfono del empleado es requerido');
+      this.mostrarAlerta('Error', 'El teléfono del empleado es requerido');
       return false;
     }
 
     if (!this.empleado.ci.trim()) {
-      alert('El C.I. del empleado es requerido');
+      this.mostrarAlerta('Error', 'El C.I. del empleado es requerido');
       return false;
     }
 
     if (!this.empleado.direccion.trim()) {
-      alert('La dirección del empleado es requerida');
+      this.mostrarAlerta('Error', 'La dirección del empleado es requerida');
       return false;
     }
 
     if (!this.empleado.usuario.trim()) {
-      alert('El usuario del empleado es requerido');
+      this.mostrarAlerta('Error', 'El usuario del empleado es requerido');
       return false;
     }
 
     if (!this.empleado.contrasena.trim() && !this.esEdicion) {
-      alert('La contraseña del empleado es requerida');
+      this.mostrarAlerta('Error', 'La contraseña del empleado es requerida');
       return false;
     }
 
     if (!this.empleado.rol) {
-      alert('Debe seleccionar un rol para el empleado');
+      this.mostrarAlerta('Error', 'Debe seleccionar un rol para el empleado');
       return false;
     }
 
     return true;
+  }
+
+  // Confirmar eliminación del empleado
+  async confirmarEliminarEmpleado() {
+    const alert = await this.alertController.create({
+      header: '¿Eliminar Empleado?',
+      message: '¿Estás seguro que deseas eliminar este empleado? Esta acción no se puede deshacer.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Eliminar',
+          cssClass: 'danger',
+          handler: () => {
+            this.eliminarEmpleado();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  // Eliminar empleado (eliminación lógica)
+  async eliminarEmpleado() {
+    this.loading = true;
+
+    try {
+      await this.supabaseService.deleteEmpleado(parseInt(this.empleadoId));
+
+      const successAlert = await this.alertController.create({
+        header: 'Empleado Eliminado',
+        message: 'El empleado ha sido eliminado exitosamente',
+        buttons: ['OK']
+      });
+
+      await successAlert.present();
+      await successAlert.onDidDismiss();
+
+      this.router.navigate(['/tabs/empleados']);
+    } catch (error) {
+      console.error('Error eliminando empleado:', error);
+      await this.mostrarAlerta('Error', 'No se pudo eliminar el empleado');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertController.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

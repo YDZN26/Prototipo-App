@@ -51,18 +51,18 @@
 
 // Lista de productos
 .productos-lista {
-  padding: 0 15px 120px 15px; // Espacio para el botón
+  padding: 0 15px 120px 15px;
 
   .producto-item {
     background: #e5e5e5;
-    padding: 20px;
+    padding: 12px 15px;
     margin-bottom: 8px;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 15px;
     position: relative;
 
     &:active {
@@ -74,14 +74,51 @@
       border: 2px solid #2979FF;
     }
 
+    // ✅ NUEVO: Estilos para la imagen
+    .producto-imagen {
+      flex-shrink: 0;
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .imagen-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #d8d8d8 0%, #c0c0c0 100%);
+
+        ion-icon {
+          font-size: 32px;
+          color: #999;
+        }
+      }
+    }
+
     .producto-info {
       flex: 1;
+      min-width: 0;
 
       .producto-nombre {
         font-size: 16px;
         font-weight: 600;
         color: #333;
         margin-bottom: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .producto-disponible {
@@ -93,10 +130,13 @@
       .producto-precio {
         font-size: 14px;
         color: #666;
+        font-weight: 500;
       }
     }
 
     .selection-indicator {
+      flex-shrink: 0;
+
       ion-icon {
         font-size: 24px;
         color: #2979FF;

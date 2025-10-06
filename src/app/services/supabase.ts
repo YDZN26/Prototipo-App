@@ -15,7 +15,62 @@ export class SupabaseService {
     );
   }
 
-  // CATEGORÍAS
+  // ==================== AUTENTICACIÓN CON HASH ====================
+
+  // Login con Supabase Auth (usa bcrypt automáticamente)
+  async login(usuario: string, contrasena: string) {
+    try {
+      // Convertir usuario a email format
+      const email = usuario + '@drakarys.com'; // ✅ CAMBIADO
+
+      // Intentar login con Supabase Auth
+      const { data: authData, error: authError } = await this.supabase.auth.signInWithPassword({
+        email: email,
+        password: contrasena
+      });
+
+      if (authError) throw authError;
+
+      // Obtener datos del empleado desde la tabla empleados
+      const { data: empleado, error: empleadoError } = await this.supabase
+        .from('empleados')
+        .select('*')
+        .eq('auth_user_id', authData.user.id)
+        .is('deleted_at', null)
+        .single();
+
+      if (empleadoError) throw empleadoError;
+
+      return {
+        user: authData.user,
+        empleado: empleado
+      };
+    } catch (error) {
+      console.error('Error en login:', error);
+      throw new Error('Usuario o contraseña incorrectos');
+    }
+  }
+
+  // Logout
+  async logout() {
+    const { error } = await this.supabase.auth.signOut();
+    if (error) throw error;
+  }
+
+  // Obtener sesión actual
+  async getSession() {
+    const { data, error } = await this.supabase.auth.getSession();
+    if (error) throw error;
+    return data.session;
+  }
+
+  // Verificar si hay usuario autenticado
+  async getCurrentUser() {
+    const { data: { user } } = await this.supabase.auth.getUser();
+    return user;
+  }
+
+  // ==================== CATEGORÍAS ====================
   async getCategorias() {
     const { data, error } = await this.supabase
       .from('categorias')
@@ -26,7 +81,7 @@ export class SupabaseService {
     return data;
   }
 
-  // PRODUCTOS
+  // ==================== PRODUCTOS ====================
   async getProductos() {
     const { data, error } = await this.supabase
       .from('productos')
@@ -34,6 +89,7 @@ export class SupabaseService {
         *,
         categorias (nombre)
       `)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -78,16 +134,16 @@ export class SupabaseService {
   async deleteProducto(id: number) {
     const { error } = await this.supabase
       .from('productos')
-      .delete()
+      .update({
+        deleted_at: new Date().toISOString()
+      })
       .eq('id', id);
 
     if (error) throw error;
   }
 
-  // ACTUALIZAR STOCK DE UN PRODUCTO
   async updateStockProducto(productoId: number, cantidadVendida: number) {
     try {
-      // 1. Obtener el stock actual del producto
       const { data: productoActual, error: errorGet } = await this.supabase
         .from('productos')
         .select('stock')
@@ -96,15 +152,12 @@ export class SupabaseService {
 
       if (errorGet) throw errorGet;
 
-      // 2. Calcular el nuevo stock
       const nuevoStock = productoActual.stock - cantidadVendida;
 
-      // 3. Validar que no sea negativo
       if (nuevoStock < 0) {
         throw new Error(`Stock insuficiente para el producto ID ${productoId}`);
       }
 
-      // 4. Actualizar el stock en la base de datos
       const { data, error: errorUpdate } = await this.supabase
         .from('productos')
         .update({ stock: nuevoStock })
@@ -122,13 +175,12 @@ export class SupabaseService {
     }
   }
 
-  // ACTUALIZAR STOCK DE MÚLTIPLES PRODUCTOS
   async updateStockMultiplesProductos(productos: { id: number, cantidad: number }[]) {
     try {
-      const promesas = productos.map(producto => 
+      const promesas = productos.map(producto =>
         this.updateStockProducto(producto.id, producto.cantidad)
       );
-      
+
       await Promise.all(promesas);
       console.log('Todos los stocks actualizados correctamente');
     } catch (error) {
@@ -137,11 +189,12 @@ export class SupabaseService {
     }
   }
 
-  // CLIENTES
+  // ==================== CLIENTES ====================
   async getClientes() {
     const { data, error } = await this.supabase
       .from('clientes')
       .select('*')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -177,33 +230,69 @@ export class SupabaseService {
     return data;
   }
 
-  // EMPLEADOS
+  async deleteCliente(id: number) {
+    const { error } = await this.supabase
+      .from('clientes')
+      .update({
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  }
+
+  // ==================== EMPLEADOS ====================
   async getEmpleados() {
     const { data, error } = await this.supabase
       .from('empleados')
       .select('*')
-      .order('created_at', { ascending: false });
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false});
 
     if (error) throw error;
     return data;
   }
 
   async createEmpleado(empleado: any) {
-    const { data, error } = await this.supabase
-      .from('empleados')
-      .insert([{
-        nombre: empleado.nombre,
-        telefono: empleado.telefono,
-        ci: empleado.ci,
-        direccion: empleado.direccion,
-        usuario: empleado.usuario,
-        contrasena: empleado.contrasena,
-        rol: empleado.rol
-      }])
-      .select();
+    try {
+      // Convertir usuario a email format
+      const email = empleado.usuario + '@drakarys.com'; // ✅ CAMBIADO
 
-    if (error) throw error;
-    return data;
+      // Crear usuario en Supabase Auth (esto hashea la contraseña con bcrypt)
+      const { data: authData, error: authError } = await this.supabase.auth.signUp({
+        email: email,
+        password: empleado.contrasena,
+        options: {
+          data: {
+            nombre: empleado.nombre,
+            rol: empleado.rol
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      // Crear registro en tabla empleados
+      const { data, error } = await this.supabase
+        .from('empleados')
+        .insert([{
+          auth_user_id: authData.user?.id,
+          nombre: empleado.nombre,
+          telefono: empleado.telefono,
+          ci: empleado.ci,
+          direccion: empleado.direccion,
+          usuario: empleado.usuario,
+          contrasena: '********', // No guardar contraseña aquí
+          rol: empleado.rol
+        }])
+        .select();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creando empleado:', error);
+      throw error;
+    }
   }
 
   async updateEmpleado(id: number, empleado: any) {
@@ -215,7 +304,6 @@ export class SupabaseService {
         ci: empleado.ci,
         direccion: empleado.direccion,
         usuario: empleado.usuario,
-        contrasena: empleado.contrasena,
         rol: empleado.rol
       })
       .eq('id', id)
@@ -225,11 +313,23 @@ export class SupabaseService {
     return data;
   }
 
-  // PROVEEDORES
+  async deleteEmpleado(id: number) {
+    const { error } = await this.supabase
+      .from('empleados')
+      .update({
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  }
+
+  // ==================== PROVEEDORES ====================
   async getProveedores() {
     const { data, error } = await this.supabase
       .from('proveedores')
       .select('*')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false});
 
     if (error) throw error;
@@ -269,7 +369,18 @@ export class SupabaseService {
     return data;
   }
 
-  // VENTAS
+  async deleteProveedor(id: number) {
+    const { error } = await this.supabase
+      .from('proveedores')
+      .update({
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  }
+
+  // ==================== VENTAS ====================
   async createVenta(venta: any) {
     const fechaActual = new Date();
     const fechaBolivia = new Date(fechaActual.getTime() - (4 * 60 * 60 * 1000));
@@ -345,19 +456,6 @@ export class SupabaseService {
         )
       `)
       .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return data;
-  }
-
-  // LOGIN/AUTENTICACIÓN
-  async login(usuario: string, contrasena: string) {
-    const { data, error } = await this.supabase
-      .from('empleados')
-      .select('*')
-      .eq('usuario', usuario)
-      .eq('contrasena', contrasena)
       .single();
 
     if (error) throw error;

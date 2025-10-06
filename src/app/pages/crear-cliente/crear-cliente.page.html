@@ -59,6 +59,16 @@
         <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
         {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Cliente' : 'Guardar Cliente') }}
       </ion-button>
+
+      <!-- Botón eliminar (solo en modo edición) -->
+      <ion-button
+        *ngIf="esEdicion"
+        expand="block"
+        class="eliminar-button"
+        (click)="confirmarEliminarCliente()"
+        [disabled]="loading">
+        Eliminar Cliente
+      </ion-button>
     </div>
   </div>
 </ion-content>

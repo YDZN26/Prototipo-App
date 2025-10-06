@@ -41,11 +41,25 @@
       class="producto-item"
       [ngClass]="{'selected': isProductoSeleccionado(producto.id)}"
       (click)="toggleProducto(producto)">
+
+      <!-- Imagen del producto -->
+      <div class="producto-imagen">
+        <img
+          *ngIf="producto.imagen_url"
+          [src]="producto.imagen_url"
+          [alt]="producto.nombre"
+          (error)="onImageError($event)">
+        <div *ngIf="!producto.imagen_url" class="imagen-placeholder">
+          <ion-icon name="image-outline"></ion-icon>
+        </div>
+      </div>
+
       <div class="producto-info">
         <div class="producto-nombre">{{ producto.nombre }}</div>
         <div class="producto-disponible">{{ producto.stock }} Disponible</div>
         <div class="producto-precio">{{ producto.precio }} Bs.</div>
       </div>
+
       <div class="selection-indicator" *ngIf="isProductoSeleccionado(producto.id)">
         <ion-icon name="checkmark-circle" color="primary"></ion-icon>
       </div>

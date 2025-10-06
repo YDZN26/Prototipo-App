@@ -36,8 +36,8 @@
 
   <!-- Categorías -->
   <div class="categorias-container">
-    <ion-button 
-      *ngFor="let categoria of categorias" 
+    <ion-button
+      *ngFor="let categoria of categorias"
       [fill]="categoria.selected ? 'solid' : 'outline'"
       [color]="categoria.selected ? 'primary' : 'medium'"
       size="small"
@@ -49,24 +49,36 @@
 
   <!-- Lista de productos -->
   <div class="productos-lista">
-    <!-- ✅ Solo permitir click si es administrador -->
-    <div 
-      *ngFor="let producto of filteredProductos" 
-      class="producto-item"
-      [class.no-clickable]="!isAdmin()"
-      (click)="isAdmin() ? editarProducto(producto) : null">
-      <div class="producto-info">
-        <div class="producto-nombre">{{ producto.nombre }}</div>
-        <div class="producto-stock">{{ producto.stock }} Disponible</div>
-        <div class="producto-precio">{{ producto.precio }} Bs.</div>
+  <div
+    *ngFor="let producto of filteredProductos"
+    class="producto-item"
+    [class.no-clickable]="!isAdmin()"
+    (click)="isAdmin() ? editarProducto(producto) : null">
+
+    <!-- ✅ NUEVA: Imagen del producto -->
+    <div class="producto-imagen">
+      <img
+        *ngIf="producto.imagen_url"
+        [src]="producto.imagen_url"
+        [alt]="producto.nombre"
+        (error)="onImageError($event)">
+      <div *ngIf="!producto.imagen_url" class="imagen-placeholder">
+        <ion-icon name="image-outline"></ion-icon>
       </div>
     </div>
+
+    <div class="producto-info">
+      <div class="producto-nombre">{{ producto.nombre }}</div>
+      <div class="producto-stock">{{ producto.stock }} Disponible</div>
+      <div class="producto-precio">{{ producto.precio }} Bs.</div>
+    </div>
   </div>
+</div>
 
   <!-- ✅ Botón solo visible para administradores -->
   <div class="create-product-container" *ngIf="isAdmin()">
-    <ion-button 
-      expand="block" 
+    <ion-button
+      expand="block"
       class="create-product-button"
       (click)="crearProducto()">
       Crear Producto

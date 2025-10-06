@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
 
 @Component({
@@ -25,7 +26,8 @@ export class CrearClientePage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
@@ -60,15 +62,13 @@ export class CrearClientePage implements OnInit {
     this.location.back();
   }
 
-  // ✅ NUEVO: Validar que solo se ingresen números en teléfono
   validarSoloNumeros(event: any) {
     const input = event.target;
     const valor = input.value;
-    const soloNumeros = valor.replace(/\D/g, ''); // Elimina todo lo que NO sea dígito
-    
+    const soloNumeros = valor.replace(/\D/g, '');
+
     if (valor !== soloNumeros) {
       this.cliente.telefono = soloNumeros;
-      // Forzar actualización en el DOM
       input.value = soloNumeros;
     }
   }
@@ -81,16 +81,14 @@ export class CrearClientePage implements OnInit {
     try {
       if (this.esEdicion) {
         await this.supabaseService.updateCliente(parseInt(this.clienteId), this.cliente);
-        console.log('Cliente actualizado');
       } else {
         await this.supabaseService.createCliente(this.cliente);
-        console.log('Cliente creado');
       }
 
       this.router.navigate(['/tabs/tab3']);
     } catch (error) {
       console.error('Error guardando cliente:', error);
-      alert('Error al guardar el cliente');
+      await this.mostrarAlerta('Error', 'No se pudo guardar el cliente');
     } finally {
       this.loading = false;
     }
@@ -98,20 +96,78 @@ export class CrearClientePage implements OnInit {
 
   validarCliente(): boolean {
     if (!this.cliente.nombre.trim()) {
-      alert('El nombre del cliente es requerido');
+      this.mostrarAlerta('Error', 'El nombre del cliente es requerido');
       return false;
     }
 
     if (!this.cliente.telefono.trim()) {
-      alert('El teléfono del cliente es requerido');
+      this.mostrarAlerta('Error', 'El teléfono del cliente es requerido');
       return false;
     }
 
     if (!this.cliente.ci.trim()) {
-      alert('La cédula de identidad del cliente es requerida');
+      this.mostrarAlerta('Error', 'La cédula de identidad del cliente es requerida');
       return false;
     }
 
     return true;
+  }
+
+  // Confirmar eliminación del cliente
+  async confirmarEliminarCliente() {
+    const alert = await this.alertController.create({
+      header: '¿Eliminar Cliente?',
+      message: '¿Estás seguro que deseas eliminar este cliente? Esta acción no se puede deshacer.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Eliminar',
+          cssClass: 'danger',
+          handler: () => {
+            this.eliminarCliente();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  // Eliminar cliente (eliminación lógica)
+  async eliminarCliente() {
+    this.loading = true;
+
+    try {
+      await this.supabaseService.deleteCliente(parseInt(this.clienteId));
+
+      const successAlert = await this.alertController.create({
+        header: 'Cliente Eliminado',
+        message: 'El cliente ha sido eliminado exitosamente',
+        buttons: ['OK']
+      });
+
+      await successAlert.present();
+      await successAlert.onDidDismiss();
+
+      this.router.navigate(['/tabs/tab3']);
+    } catch (error) {
+      console.error('Error eliminando cliente:', error);
+      await this.mostrarAlerta('Error', 'No se pudo eliminar el cliente');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertController.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

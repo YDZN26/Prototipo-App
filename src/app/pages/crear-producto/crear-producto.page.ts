@@ -274,4 +274,53 @@ export class CrearProductoPage implements OnInit {
     });
     await alert.present();
   }
+
+  // Confirmar eliminación del producto
+async confirmarEliminarProducto() {
+  const alert = await this.alertController.create({
+    header: '¿Eliminar Producto?',
+    message: '¿Estás seguro que deseas eliminar este producto? Esta acción no se puede deshacer.',
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Eliminar',
+        cssClass: 'danger',
+        handler: () => {
+          this.eliminarProducto();
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
+// Eliminar producto (eliminación lógica)
+async eliminarProducto() {
+  this.loading = true;
+
+  try {
+    await this.supabaseService.deleteProducto(parseInt(this.productoId));
+
+    const successAlert = await this.alertController.create({
+      header: 'Producto Eliminado',
+      message: 'El producto ha sido eliminado exitosamente',
+      buttons: ['OK']
+    });
+
+    await successAlert.present();
+    await successAlert.onDidDismiss();
+
+    this.router.navigate(['/tabs/tab2']);
+  } catch (error) {
+    console.error('Error eliminando producto:', error);
+    this.mostrarAlerta('Error', 'No se pudo eliminar el producto');
+  } finally {
+    this.loading = false;
+  }
+}
 }

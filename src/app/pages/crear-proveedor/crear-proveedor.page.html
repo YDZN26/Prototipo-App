@@ -35,7 +35,7 @@
         </ion-input>
       </div>
 
-      <!-- C.I. Empleado -->
+      <!-- C.I. Proveedor -->
       <div class="input-group">
         <ion-label class="input-label">C.I.</ion-label>
         <ion-input
@@ -46,7 +46,7 @@
         </ion-input>
       </div>
 
-      <!-- Dirección Empleado -->
+      <!-- Dirección Proveedor -->
       <div class="input-group">
         <ion-label class="input-label">Direccion</ion-label>
         <ion-input
@@ -62,7 +62,7 @@
         <ion-label class="input-label">Ubicacion</ion-label>
         <ion-input
           type="text"
-          placeholder="Ingrese el usuario del Proveedor"
+          placeholder="Ingrese la ubicación del Proveedor"
           [(ngModel)]="proveedor.ubicacion"
           class="custom-input">
         </ion-input>
@@ -71,13 +71,23 @@
 
     <!-- Botón guardar -->
     <div class="guardar-container">
-      <ion-button 
-        expand="block" 
+      <ion-button
+        expand="block"
         class="guardar-button"
         (click)="guardarProveedor()"
         [disabled]="loading">
         <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
         {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Proveedor' : 'Guardar Proveedor') }}
+      </ion-button>
+
+      <!-- Botón eliminar (solo en modo edición) -->
+      <ion-button
+        *ngIf="esEdicion"
+        expand="block"
+        class="eliminar-button"
+        (click)="confirmarEliminarProveedor()"
+        [disabled]="loading">
+        Eliminar Proveedor
       </ion-button>
     </div>
   </div>

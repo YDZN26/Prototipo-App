@@ -64,7 +64,7 @@ ion-toolbar {
   align-items: center;
   font-size: 16px;
   color: #333;
-  
+
   .total-number {
     font-weight: bold;
     color: #2979FF;
@@ -88,7 +88,7 @@ ion-toolbar {
     height: 35px;
     font-size: 14px;
     margin: 0;
-    
+
     &[fill="solid"] {
       --background: #2979FF;
       --color: white;
@@ -103,22 +103,66 @@ ion-toolbar {
 
   .producto-item {
     background: #e5e5e5;
-    padding: 20px;
+    padding: 12px 15px;
     margin-bottom: 8px;
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
 
+    // ✅ NUEVO: Flex para alinear imagen y contenido
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
     &:active {
       background: #d5d5d5;
     }
 
+    // ✅ NUEVO: Estilos para la imagen
+    .producto-imagen {
+      flex-shrink: 0;
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .imagen-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #d8d8d8 0%, #c0c0c0 100%);
+
+        ion-icon {
+          font-size: 32px;
+          color: #999;
+        }
+      }
+    }
+
     .producto-info {
+      flex: 1;
+      min-width: 0; // Para que el texto se corte correctamente si es muy largo
+
       .producto-nombre {
         font-size: 16px;
         font-weight: 600;
         color: #333;
         margin-bottom: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .producto-stock {
@@ -130,6 +174,16 @@ ion-toolbar {
       .producto-precio {
         font-size: 14px;
         color: #666;
+        font-weight: 500;
+      }
+    }
+
+    // ✅ NUEVO: Estilo cuando no es clickeable
+    &.no-clickable {
+      cursor: default;
+
+      &:active {
+        background: #e5e5e5;
       }
     }
   }

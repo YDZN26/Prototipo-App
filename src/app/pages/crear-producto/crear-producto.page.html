@@ -109,8 +109,19 @@
         <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
         {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Producto' : 'Guardar Producto') }}
       </ion-button>
+
+      <!-- Botón eliminar (solo en modo edición) -->
+      <ion-button
+        *ngIf="esEdicion"
+        expand="block"
+        class="eliminar-button"
+        (click)="confirmarEliminarProducto()"
+        [disabled]="loading">
+        Eliminar Producto
+      </ion-button>
     </div>
-  </div>
+
+  </div> <!-- Cierre de form-container -->
 
   <!-- Input oculto para subir archivo -->
   <input
