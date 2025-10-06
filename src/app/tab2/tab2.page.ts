@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../services/supabase';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tab2',
@@ -24,7 +25,18 @@ export class Tab2Page implements OnInit {
     private router: Router,
     private supabaseService: SupabaseService,
     private alertController: AlertController
-  ) {}
+  ) {
+    // Escuchar eventos de navegación
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Si la URL contiene /tab2, recargar productos
+      if (event.url.includes('/tab2') || event.url.includes('/tabs/tab2')) {
+        console.log('🔄 Navegación detectada a tab2, recargando productos...');
+        this.cargarProductos();
+      }
+    });
+  }
 
   async ngOnInit() {
     const nombreGuardado = localStorage.getItem('nombreUsuario');
@@ -35,7 +47,6 @@ export class Tab2Page implements OnInit {
     await this.cargarDatos();
   }
 
-  // ✅ AGREGAR este método
   isAdmin(): boolean {
     return localStorage.getItem('userRole') === 'administrador';
   }
@@ -70,6 +81,7 @@ export class Tab2Page implements OnInit {
         imagen_url: producto.imagen_url
       }));
       this.filtrarProductos();
+      console.log('✅ Productos cargados:', this.productos.length);
     } catch (error) {
       console.error('Error cargando productos:', error);
     }
@@ -110,7 +122,6 @@ export class Tab2Page implements OnInit {
   }
 
   editarProducto(producto: any) {
-    // ✅ AGREGAR validación de rol antes de editar
     if (!this.isAdmin()) {
       alert('No tienes permisos para editar productos');
       return;
@@ -122,7 +133,7 @@ export class Tab2Page implements OnInit {
     this.router.navigate(['/crear-producto']);
   }
 
-  async mostrarOpcionesUsuario(event: any) {
+  async mostrarOpcionesUsuario(_event: any) {
     const alert = await this.alertController.create({
       header: this.nombreUsuario,
       message: '¿Qué deseas hacer?',
@@ -176,6 +187,7 @@ export class Tab2Page implements OnInit {
   }
 
   async ionViewWillEnter() {
+    console.log('🔄 ionViewWillEnter ejecutado en tab2');
     await this.cargarProductos();
   }
 }

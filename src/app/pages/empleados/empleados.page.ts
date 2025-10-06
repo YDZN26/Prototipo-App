@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-empleados',
@@ -23,15 +24,25 @@ export class EmpleadosPage implements OnInit {
     private router: Router,
     private supabaseService: SupabaseService,
     private alertController: AlertController
-  ) {}
+  ) {
+    // Escuchar eventos de navegación
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Si la URL contiene /empleados, recargar empleados
+      if (event.url.includes('/empleados') || event.url.includes('/tabs/empleados')) {
+        console.log('🔄 Navegación detectada a empleados, recargando...');
+        this.cargarEmpleados();
+      }
+    });
+  }
 
   async ngOnInit() {
-    // Cargar nombre del usuario
     const nombreGuardado = localStorage.getItem('nombreUsuario');
     if (nombreGuardado) {
       this.nombreUsuario = nombreGuardado;
     }
-    
+
     await this.cargarEmpleados();
   }
 
@@ -41,6 +52,7 @@ export class EmpleadosPage implements OnInit {
       const data = await this.supabaseService.getEmpleados();
       this.empleados = data;
       this.filtrarEmpleados();
+      console.log('✅ Empleados cargados:', this.empleados.length);
     } catch (error) {
       console.error('Error cargando empleados:', error);
     } finally {
@@ -71,7 +83,7 @@ export class EmpleadosPage implements OnInit {
     this.router.navigate(['/crear-empleado']);
   }
 
-  async mostrarOpcionesUsuario(event: any) {
+  async mostrarOpcionesUsuario(_event: any) {
     const alert = await this.alertController.create({
       header: this.nombreUsuario,
       message: '¿Qué deseas hacer?',
@@ -125,6 +137,7 @@ export class EmpleadosPage implements OnInit {
   }
 
   async ionViewWillEnter() {
+    console.log('🔄 ionViewWillEnter ejecutado en empleados');
     await this.cargarEmpleados();
   }
 }

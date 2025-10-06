@@ -1,7 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { IonModal, AlertController } from '@ionic/angular';
 import { SupabaseService } from '../services/supabase';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tab1',
@@ -41,7 +42,18 @@ export class Tab1Page {
     private router: Router,
     private supabaseService: SupabaseService,
     private alertController: AlertController
-  ) {}
+  ) {
+    // Escuchar eventos de navegación
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Si la URL contiene /tab1, recargar ventas
+      if (event.url.includes('/tab1') || event.url.includes('/tabs/tab1')) {
+        console.log('🔄 Navegación detectada a tab1, recargando ventas...');
+        this.cargarVentas();
+      }
+    });
+  }
 
   ngOnInit() {
     const nombreGuardado = localStorage.getItem('nombreUsuario');
@@ -164,11 +176,10 @@ export class Tab1Page {
   async cargarVentas() {
     this.loading = true;
     try {
-      // Obtener un rango más amplio de ventas (3 días antes y después)
       const inicioAmplio = new Date(this.fechaInicioActual);
       inicioAmplio.setDate(inicioAmplio.getDate() - 1);
       inicioAmplio.setHours(0, 0, 0, 0);
-      
+
       const finAmplio = new Date(this.fechaFinActual);
       finAmplio.setDate(finAmplio.getDate() + 1);
       finAmplio.setHours(23, 59, 59, 999);
@@ -178,30 +189,28 @@ export class Tab1Page {
         finAmplio.toISOString()
       );
 
-      // Filtrar las ventas por fecha LOCAL (no UTC)
       const ventasFiltradas = todasLasVentas.filter(venta => {
         const fechaVenta = new Date(venta.fecha);
         const diaVenta = fechaVenta.getDate();
         const mesVenta = fechaVenta.getMonth();
         const añoVenta = fechaVenta.getFullYear();
-        
+
         const diaInicio = this.fechaInicioActual.getDate();
         const mesInicio = this.fechaInicioActual.getMonth();
         const añoInicio = this.fechaInicioActual.getFullYear();
-        
+
         const diaFin = this.fechaFinActual.getDate();
         const mesFin = this.fechaFinActual.getMonth();
         const añoFin = this.fechaFinActual.getFullYear();
-        
+
         const fechaVentaSinHora = new Date(añoVenta, mesVenta, diaVenta);
         const fechaInicioSinHora = new Date(añoInicio, mesInicio, diaInicio);
         const fechaFinSinHora = new Date(añoFin, mesFin, diaFin);
-        
+
         return fechaVentaSinHora >= fechaInicioSinHora && fechaVentaSinHora <= fechaFinSinHora;
       });
 
-      console.log('Total ventas obtenidas:', todasLasVentas.length);
-      console.log('Ventas después de filtrar:', ventasFiltradas.length);
+      console.log('✅ Ventas cargadas:', ventasFiltradas.length);
 
       this.procesarResumenVentas(ventasFiltradas);
       this.procesarVentasRecientes(ventasFiltradas);
@@ -242,18 +251,14 @@ export class Tab1Page {
 
   procesarVentasRecientes(ventas: any[]) {
     this.recentProducts = ventas.map(venta => {
-      // ✅ SOLUCIÓN: Parsear la fecha directamente sin ajustes
-      // Supabase devuelve timestamps en UTC, pero JavaScript los interpreta en zona local
       const fechaVenta = new Date(venta.fecha);
 
-      // Formatear hora en formato 12 horas
       const hora = fechaVenta.toLocaleTimeString('es-BO', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
       });
 
-      // Formatear fecha
       const fechaStr = fechaVenta.toLocaleDateString('es-BO', {
         day: '2-digit',
         month: '2-digit',
@@ -275,7 +280,7 @@ export class Tab1Page {
           id: venta.id,
           fecha: venta.fecha,
           clienteId: venta.cliente_id,
-          empleado_id: venta.empleado_id, // ✅ NUEVO: Pasar el empleado_id
+          empleado_id: venta.empleado_id,
           metodoPago: venta.metodo_pago,
           total: venta.total,
           productos: productos.map((p: any) => ({
@@ -316,7 +321,7 @@ export class Tab1Page {
   }
 
   registerSale() {
-    this.router.navigate(['/nueva-venta']); 
+    this.router.navigate(['/nueva-venta']);
   }
 
   verDetalleVenta(venta: any) {
@@ -327,7 +332,7 @@ export class Tab1Page {
     });
   }
 
-  async mostrarOpcionesUsuario(event: any) {
+  async mostrarOpcionesUsuario(_event: any) {
     const alert = await this.alertController.create({
       header: this.nombreUsuario,
       message: '¿Qué deseas hacer?',
@@ -390,6 +395,7 @@ export class Tab1Page {
   }
 
   async ionViewWillEnter() {
+    console.log('🔄 ionViewWillEnter ejecutado en tab1');
     if (this.mostrandoHoy) {
       await this.cargarVentas();
     }

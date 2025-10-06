@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../services/supabase';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tab3',
@@ -23,15 +24,25 @@ export class Tab3Page implements OnInit {
     private router: Router,
     private supabaseService: SupabaseService,
     private alertController: AlertController
-  ) {}
+  ) {
+    // Escuchar eventos de navegación
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Si la URL contiene /tab3, recargar clientes
+      if (event.url.includes('/tab3') || event.url.includes('/tabs/tab3')) {
+        console.log('🔄 Navegación detectada a tab3, recargando clientes...');
+        this.cargarClientes();
+      }
+    });
+  }
 
   async ngOnInit() {
-    // Cargar nombre del usuario
     const nombreGuardado = localStorage.getItem('nombreUsuario');
     if (nombreGuardado) {
       this.nombreUsuario = nombreGuardado;
     }
-    
+
     await this.cargarClientes();
   }
 
@@ -41,6 +52,7 @@ export class Tab3Page implements OnInit {
       const data = await this.supabaseService.getClientes();
       this.clientes = data;
       this.filtrarClientes();
+      console.log('✅ Clientes cargados:', this.clientes.length);
     } catch (error) {
       console.error('Error cargando clientes:', error);
     } finally {
@@ -69,7 +81,7 @@ export class Tab3Page implements OnInit {
     this.router.navigate(['/crear-cliente']);
   }
 
-  async mostrarOpcionesUsuario(event: any) {
+  async mostrarOpcionesUsuario(_event: any) {
     const alert = await this.alertController.create({
       header: this.nombreUsuario,
       message: '¿Qué deseas hacer?',
@@ -123,7 +135,7 @@ export class Tab3Page implements OnInit {
   }
 
   async ionViewWillEnter() {
-    // Recargar clientes cuando se vuelve a la página
+    console.log('🔄 ionViewWillEnter ejecutado');
     await this.cargarClientes();
   }
 }

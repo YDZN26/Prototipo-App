@@ -15,7 +15,8 @@ export class DetalleVentaPage implements OnInit {
     total: 0,
     clienteId: '',
     metodoPago: '',
-    fecha: ''
+    fecha: '',
+    empleado_id: null
   };
 
   fechaFormateada: string = '';
@@ -32,17 +33,12 @@ export class DetalleVentaPage implements OnInit {
 
   async ngOnInit() {
     this.route.queryParams.subscribe(async params => {
-      // Obtener nombre del empleado desde los parámetros
-      if (params['nombreEmpleado']) {
-        this.nombreEmpleado = params['nombreEmpleado'];
-      } else {
-        // Si no viene en parámetros, obtener del localStorage
-        this.nombreEmpleado = localStorage.getItem('nombreUsuario') || 'Empleado';
-      }
-
       if (params['ventaData']) {
         this.venta = JSON.parse(params['ventaData']);
-        
+
+        // ✅ Cargar el nombre del empleado que hizo la venta
+        await this.cargarNombreEmpleado();
+
         // Si la venta tiene ID, obtener datos completos de Supabase
         if (this.venta.id) {
           await this.cargarDatosCompletos();
@@ -55,17 +51,36 @@ export class DetalleVentaPage implements OnInit {
     });
   }
 
+  // ✅ NUEVO: Método para cargar el nombre del empleado que hizo la venta
+  async cargarNombreEmpleado() {
+    const empleadoId = this.venta.empleado_id;
+
+    if (empleadoId) {
+      try {
+        const empleados = await this.supabaseService.getEmpleados();
+        const empleado = empleados.find(e => e.id === empleadoId);
+        this.nombreEmpleado = empleado ? empleado.nombre : 'Empleado no encontrado';
+      } catch (error) {
+        console.error('Error cargando empleado:', error);
+        this.nombreEmpleado = 'Error al cargar empleado';
+      }
+    } else {
+      // Si no hay empleado_id, usar el usuario actual como fallback
+      this.nombreEmpleado = localStorage.getItem('nombreUsuario') || 'Empleado';
+    }
+  }
+
   async cargarDatosCompletos() {
     this.loading = true;
     try {
       // Cargar nombre del cliente si existe clienteId
       await this.cargarNombreCliente();
-      
+
       // Formatear los datos
       this.formatearDatos();
     } catch (error) {
       console.error('Error cargando datos completos:', error);
-      this.formatearDatos(); // Usar datos disponibles
+      this.formatearDatos();
     } finally {
       this.loading = false;
     }
@@ -73,7 +88,7 @@ export class DetalleVentaPage implements OnInit {
 
   async cargarNombreCliente() {
     const clienteId = this.venta.clienteId || this.venta.cliente_id;
-    
+
     if (clienteId) {
       try {
         const clientes = await this.supabaseService.getClientes();
@@ -91,18 +106,17 @@ export class DetalleVentaPage implements OnInit {
   formatearDatos() {
     // Formatear fecha y hora
     const fecha = new Date(this.venta.fecha);
-    
-    // Formatear hora en formato 12 horas
+
     const hora = fecha.toLocaleTimeString('es-BO', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
     });
-    
+
     const dia = fecha.getDate().toString().padStart(2, '0');
     const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
     const año = fecha.getFullYear();
-    
+
     this.fechaFormateada = `${hora} | ${dia}/${mes}/${año}`;
 
     // Formatear método de pago

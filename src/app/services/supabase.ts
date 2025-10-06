@@ -256,7 +256,7 @@ export class SupabaseService {
   async createEmpleado(empleado: any) {
     try {
       // Convertir usuario a email format
-      const email = empleado.usuario + '@drakarys.com'; // ✅ CAMBIADO
+      const email = empleado.usuario + '@drakarys.com';
 
       // Crear usuario en Supabase Auth (esto hashea la contraseña con bcrypt)
       const { data: authData, error: authError } = await this.supabase.auth.signUp({

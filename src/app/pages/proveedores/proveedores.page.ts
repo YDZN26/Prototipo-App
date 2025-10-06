@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-proveedores',
@@ -23,15 +24,25 @@ export class ProveedoresPage implements OnInit {
     private router: Router,
     private supabaseService: SupabaseService,
     private alertController: AlertController
-  ) {}
+  ) {
+    // Escuchar eventos de navegación
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Si la URL contiene /proveedores, recargar proveedores
+      if (event.url.includes('/proveedores') || event.url.includes('/tabs/proveedores')) {
+        console.log('🔄 Navegación detectada a proveedores, recargando...');
+        this.cargarProveedores();
+      }
+    });
+  }
 
   async ngOnInit() {
-    // Cargar nombre del usuario
     const nombreGuardado = localStorage.getItem('nombreUsuario');
     if (nombreGuardado) {
       this.nombreUsuario = nombreGuardado;
     }
-    
+
     await this.cargarProveedores();
   }
 
@@ -41,6 +52,7 @@ export class ProveedoresPage implements OnInit {
       const data = await this.supabaseService.getProveedores();
       this.proveedores = data;
       this.filtrarProveedores();
+      console.log('✅ Proveedores cargados:', this.proveedores.length);
     } catch (error) {
       console.error('Error cargando proveedores:', error);
     } finally {
@@ -71,7 +83,7 @@ export class ProveedoresPage implements OnInit {
     this.router.navigate(['/crear-proveedor']);
   }
 
-  async mostrarOpcionesUsuario(event: any) {
+  async mostrarOpcionesUsuario(_event: any) {
     const alert = await this.alertController.create({
       header: this.nombreUsuario,
       message: '¿Qué deseas hacer?',
@@ -125,6 +137,7 @@ export class ProveedoresPage implements OnInit {
   }
 
   async ionViewWillEnter() {
+    console.log('🔄 ionViewWillEnter ejecutado en proveedores');
     await this.cargarProveedores();
   }
 }
