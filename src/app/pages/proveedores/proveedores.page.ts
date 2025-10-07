@@ -52,7 +52,7 @@ export class ProveedoresPage implements OnInit {
       const data = await this.supabaseService.getProveedores();
       this.proveedores = data;
       this.filtrarProveedores();
-      console.log('✅ Proveedores cargados:', this.proveedores.length);
+      console.log('Proveedores cargados:', this.proveedores.length);
     } catch (error) {
       console.error('Error cargando proveedores:', error);
     } finally {

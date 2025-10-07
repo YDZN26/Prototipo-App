@@ -52,7 +52,7 @@ export class Tab3Page implements OnInit {
       const data = await this.supabaseService.getClientes();
       this.clientes = data;
       this.filtrarClientes();
-      console.log('✅ Clientes cargados:', this.clientes.length);
+      console.log('Clientes cargados:', this.clientes.length);
     } catch (error) {
       console.error('Error cargando clientes:', error);
     } finally {
@@ -135,7 +135,7 @@ export class Tab3Page implements OnInit {
   }
 
   async ionViewWillEnter() {
-    console.log('🔄 ionViewWillEnter ejecutado');
+    console.log('ionViewWillEnter ejecutado');
     await this.cargarClientes();
   }
 }

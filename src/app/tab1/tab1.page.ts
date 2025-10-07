@@ -210,7 +210,7 @@ export class Tab1Page {
         return fechaVentaSinHora >= fechaInicioSinHora && fechaVentaSinHora <= fechaFinSinHora;
       });
 
-      console.log('✅ Ventas cargadas:', ventasFiltradas.length);
+      console.log('Ventas cargadas:', ventasFiltradas.length);
 
       this.procesarResumenVentas(ventasFiltradas);
       this.procesarVentasRecientes(ventasFiltradas);
@@ -250,52 +250,55 @@ export class Tab1Page {
   }
 
   procesarVentasRecientes(ventas: any[]) {
-    this.recentProducts = ventas.map(venta => {
-      const fechaVenta = new Date(venta.fecha);
+  this.recentProducts = ventas.map(venta => {
+    const fechaVenta = new Date(venta.fecha);
 
-      const hora = fechaVenta.toLocaleTimeString('es-BO', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-
-      const fechaStr = fechaVenta.toLocaleDateString('es-BO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-
-      const productos = venta.venta_productos || [];
-      const nombreProductos = productos.length > 0
-        ? productos.map((p: any) => p.productos?.nombre).filter(Boolean).slice(0, 2).join(', ')
-        : 'Sin productos';
-
-      return {
-        id: venta.id,
-        name: nombreProductos,
-        type: this.formatearMetodoPago(venta.metodo_pago),
-        time: `${fechaStr} - ${hora}`,
-        price: venta.total,
-        ventaCompleta: {
-          id: venta.id,
-          fecha: venta.fecha,
-          clienteId: venta.cliente_id,
-          empleado_id: venta.empleado_id,
-          metodoPago: venta.metodo_pago,
-          total: venta.total,
-          productos: productos.map((p: any) => ({
-            id: p.producto_id,
-            nombre: p.productos?.nombre || 'Producto',
-            cantidad: p.cantidad,
-            precioUnitario: p.precio_unitario,
-            subtotal: p.subtotal
-          }))
-        }
-      };
+    const hora = fechaVenta.toLocaleTimeString('es-BO', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
 
-    this.filteredProducts = this.recentProducts;
-  }
+    const fechaStr = fechaVenta.toLocaleDateString('es-BO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+
+    const productos = venta.venta_productos || [];
+    const nombreProductos = productos.length > 0
+      ? productos.map((p: any) => p.productos?.nombre).filter(Boolean).slice(0, 2).join(', ')
+      : 'Sin productos';
+
+    //DEBUG: Ver empleado_id de cada venta
+    console.log(`🔍 Venta ${venta.id} - empleado_id:`, venta.empleado_id);
+
+    return {
+      id: venta.id,
+      name: nombreProductos,
+      type: this.formatearMetodoPago(venta.metodo_pago),
+      time: `${fechaStr} - ${hora}`,
+      price: venta.total,
+      ventaCompleta: {
+        id: venta.id,
+        fecha: venta.fecha,
+        clienteId: venta.cliente_id,
+        empleado_id: venta.empleado_id,  //Esto debe tener el ID correcto
+        metodoPago: venta.metodo_pago,
+        total: venta.total,
+        productos: productos.map((p: any) => ({
+          id: p.producto_id,
+          nombre: p.productos?.nombre || 'Producto',
+          cantidad: p.cantidad,
+          precioUnitario: p.precio_unitario,
+          subtotal: p.subtotal
+        }))
+      }
+    };
+  });
+
+  this.filteredProducts = this.recentProducts;
+}
 
   formatearMetodoPago(metodo: string): string {
     switch (metodo) {

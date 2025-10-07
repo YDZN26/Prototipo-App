@@ -36,7 +36,11 @@ export class DetalleVentaPage implements OnInit {
       if (params['ventaData']) {
         this.venta = JSON.parse(params['ventaData']);
 
-        // ✅ Cargar el nombre del empleado que hizo la venta
+        // DEBUG: Ver qué datos llegan
+        console.log('📋 Datos completos de la venta:', this.venta);
+        console.log('👤 Empleado ID de la venta:', this.venta.empleado_id);
+
+        // Cargar el nombre del empleado que hizo la venta
         await this.cargarNombreEmpleado();
 
         // Si la venta tiene ID, obtener datos completos de Supabase
@@ -51,21 +55,29 @@ export class DetalleVentaPage implements OnInit {
     });
   }
 
-  // ✅ NUEVO: Método para cargar el nombre del empleado que hizo la venta
+  // NUEVO: Método para cargar el nombre del empleado que hizo la venta
   async cargarNombreEmpleado() {
     const empleadoId = this.venta.empleado_id;
+
+    console.log('Buscando empleado con ID:', empleadoId);
 
     if (empleadoId) {
       try {
         const empleados = await this.supabaseService.getEmpleados();
+        console.log('Total empleados disponibles:', empleados.length);
+        console.log('Empleados:', empleados.map(e => ({ id: e.id, nombre: e.nombre })));
+
         const empleado = empleados.find(e => e.id === empleadoId);
+        console.log('Empleado encontrado:', empleado);
+
         this.nombreEmpleado = empleado ? empleado.nombre : 'Empleado no encontrado';
+        console.log('Nombre empleado asignado:', this.nombreEmpleado);
       } catch (error) {
-        console.error('Error cargando empleado:', error);
+        console.error('❌ Error cargando empleado:', error);
         this.nombreEmpleado = 'Error al cargar empleado';
       }
     } else {
-      // Si no hay empleado_id, usar el usuario actual como fallback
+      console.log('No hay empleado_id en la venta, usando localStorage');
       this.nombreEmpleado = localStorage.getItem('nombreUsuario') || 'Empleado';
     }
   }

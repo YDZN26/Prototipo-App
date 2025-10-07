@@ -25,12 +25,12 @@ export class SeleccionarProductosPage implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // ✅ NUEVO: Cargar productos del carrito actual si existen
+    // Cargar productos del carrito actual si existen
     this.cargarCarritoActual();
     await this.cargarDatos();
   }
 
-  // ✅ NUEVO: Cargar el estado actual del carrito
+  // Cargar el estado actual del carrito
   cargarCarritoActual() {
     this.route.queryParams.subscribe(params => {
       if (params['carritoActual']) {
@@ -44,7 +44,7 @@ export class SeleccionarProductosPage implements OnInit {
             precio: item.precioUnitario, // Usar el precio actual del carrito
             categoria: item.categoria,
             categoria_id: item.categoria_id,
-            cantidad: item.cantidad, // ✅ Mantener la cantidad actual
+            cantidad: item.cantidad, //Mantener la cantidad actual
             precioUnitario: item.precioUnitario,
             subtotal: item.subtotal
           }));
@@ -124,10 +124,10 @@ export class SeleccionarProductosPage implements OnInit {
     const index = this.productosSeleccionados.findIndex(p => p.id === producto.id);
 
     if (index > -1) {
-      // ✅ Deseleccionar producto
+      // Deseleccionar producto
       this.productosSeleccionados.splice(index, 1);
     } else {
-      // ✅ Seleccionar producto nuevo (siempre con cantidad 1)
+      // Seleccionar producto nuevo (siempre con cantidad 1)
       this.productosSeleccionados.push({
         ...producto,
         cantidad: 1,

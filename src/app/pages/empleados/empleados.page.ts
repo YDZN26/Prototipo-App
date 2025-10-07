@@ -52,7 +52,7 @@ export class EmpleadosPage implements OnInit {
       const data = await this.supabaseService.getEmpleados();
       this.empleados = data;
       this.filtrarEmpleados();
-      console.log('✅ Empleados cargados:', this.empleados.length);
+      console.log('Empleados cargados:', this.empleados.length);
     } catch (error) {
       console.error('Error cargando empleados:', error);
     } finally {
@@ -137,7 +137,7 @@ export class EmpleadosPage implements OnInit {
   }
 
   async ionViewWillEnter() {
-    console.log('🔄 ionViewWillEnter ejecutado en empleados');
+    console.log('ionViewWillEnter ejecutado en empleados');
     await this.cargarEmpleados();
   }
 }

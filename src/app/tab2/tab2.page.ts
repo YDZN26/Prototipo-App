@@ -81,7 +81,7 @@ export class Tab2Page implements OnInit {
         imagen_url: producto.imagen_url
       }));
       this.filtrarProductos();
-      console.log('✅ Productos cargados:', this.productos.length);
+      console.log('Productos cargados:', this.productos.length);
     } catch (error) {
       console.error('Error cargando productos:', error);
     }

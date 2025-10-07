@@ -97,7 +97,7 @@ export class CrearProductoPage implements OnInit {
     this.location.back();
   }
 
-  // ✅ NUEVO: Validar que solo se ingresen números positivos (>= 0)
+  // Validar que solo se ingresen números positivos (>= 0)
   validarNumeroPositivo(event: any, campo: string) {
     const input = event.target;
     let valor = parseFloat(input.value);

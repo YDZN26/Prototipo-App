@@ -78,21 +78,21 @@ export class ConfirmarProductosPage implements OnInit {
   onCantidadInput(index: number, event: any) {
     const producto = this.productosCarrito[index];
     const textoIngresado = event.target.value;
-    
+
     producto.cantidadTexto = textoIngresado;
-    
+
     if (!textoIngresado || textoIngresado.trim() === '') {
       producto.cantidadInvalida = true;
       return;
     }
-    
+
     const valor = parseInt(textoIngresado);
-    
+
     if (isNaN(valor) || valor <= 0) {
       producto.cantidadInvalida = true;
       return;
     }
-    
+
     if (valor > producto.stock) {
       producto.cantidad = producto.stock;
       producto.cantidadTexto = producto.stock.toString();
@@ -100,7 +100,7 @@ export class ConfirmarProductosPage implements OnInit {
     } else {
       producto.cantidad = valor;
     }
-    
+
     producto.cantidadInvalida = false;
     this.actualizarSubtotal(index);
     this.actualizarConcepto();
@@ -203,74 +203,80 @@ export class ConfirmarProductosPage implements OnInit {
   }
 
   async confirmarVenta() {
-    if (this.hayCantidadesInvalidas()) {
-      alert('Por favor corrige las cantidades inválidas antes de confirmar');
-      return;
-    }
+  if (this.hayCantidadesInvalidas()) {
+    alert('Por favor corrige las cantidades inválidas antes de confirmar');
+    return;
+  }
 
-    if (this.productosCarrito.length === 0) {
-      alert('No hay productos en el carrito');
-      return;
-    }
+  if (this.productosCarrito.length === 0) {
+    alert('No hay productos en el carrito');
+    return;
+  }
 
-    if (!this.ventaTemporal) {
-      alert('Error: No se encontraron los datos de la venta');
-      return;
-    }
+  if (!this.ventaTemporal) {
+    alert('Error: No se encontraron los datos de la venta');
+    return;
+  }
 
-    this.loading = true;
+  this.loading = true;
+
+  try {
+    const ahora = new Date();
+
+    console.log('Fecha local del sistema:', ahora.toString());
+    console.log('Fecha ISO que se guardará:', ahora.toISOString());
+
+    // Obtener el ID del empleado actual desde localStorage
+    const empleadoId = parseInt(localStorage.getItem('userId') || '1');
+    console.log('👤 Empleado actual realizando la venta:', empleadoId);
+
+    const ventaFinal = {
+      fecha: ahora.toISOString(),
+      clienteId: parseInt(this.ventaTemporal.clienteId),
+      metodoPago: this.ventaTemporal.metodoPago,
+      empleadoId: empleadoId,
+      productos: this.productosCarrito,
+      total: this.calcularTotal()
+    };
+
+    const ventaCreada = await this.supabaseService.createVenta(ventaFinal);
+    console.log('Venta creada exitosamente:', ventaCreada);
 
     try {
-      // Guardar fecha/hora local SIN ajustes
-      const ahora = new Date();
-      
-      console.log('Fecha local del sistema:', ahora.toString());
-      console.log('Fecha ISO que se guardará:', ahora.toISOString());
+      const productosParaActualizar = this.productosCarrito.map(p => ({
+        id: p.id,
+        cantidad: p.cantidad
+      }));
 
-      const ventaFinal = {
-        fecha: ahora.toISOString(), // Guardar la fecha tal cual
-        clienteId: parseInt(this.ventaTemporal.clienteId),
-        metodoPago: this.ventaTemporal.metodoPago,
-        productos: this.productosCarrito,
-        total: this.calcularTotal()
-      };
-
-      const ventaCreada = await this.supabaseService.createVenta(ventaFinal);
-      console.log('Venta creada exitosamente:', ventaCreada);
-
-      try {
-        const productosParaActualizar = this.productosCarrito.map(p => ({
-          id: p.id,
-          cantidad: p.cantidad
-        }));
-
-        await this.supabaseService.updateStockMultiplesProductos(productosParaActualizar);
-        console.log('Stocks actualizados correctamente');
-      } catch (errorStock) {
-        console.error('Error actualizando stocks:', errorStock);
-        alert('Venta registrada correctamente, pero hubo un problema actualizando el inventario.');
-      }
-
-      localStorage.removeItem('ventaTemporal');
-
-      this.router.navigate(['/detalle-venta'], {
-        queryParams: {
-          ventaData: JSON.stringify({
-            id: ventaCreada.id,
-            fecha: ventaCreada.fecha,
-            clienteId: ventaFinal.clienteId,
-            metodoPago: ventaFinal.metodoPago,
-            total: ventaFinal.total,
-            productos: this.productosCarrito
-          })
-        }
-      });
-
-    } catch (error) {
-      console.error('Error creando venta:', error);
-      alert('Error al crear la venta. Intenta nuevamente.');
-    } finally {
-      this.loading = false;
+      await this.supabaseService.updateStockMultiplesProductos(productosParaActualizar);
+      console.log('Stocks actualizados correctamente');
+    } catch (errorStock) {
+      console.error('Error actualizando stocks:', errorStock);
+      alert('Venta registrada correctamente, pero hubo un problema actualizando el inventario.');
     }
+
+    localStorage.removeItem('ventaTemporal');
+
+
+    this.router.navigate(['/detalle-venta'], {
+      queryParams: {
+        ventaData: JSON.stringify({
+          id: ventaCreada.id,
+          fecha: ventaCreada.fecha,
+          clienteId: ventaFinal.clienteId,
+          empleado_id: empleadoId,
+          metodoPago: ventaFinal.metodoPago,
+          total: ventaFinal.total,
+          productos: this.productosCarrito
+        })
+      }
+    });
+
+  } catch (error) {
+    console.error('Error creando venta:', error);
+    alert('Error al crear la venta. Intenta nuevamente.');
+  } finally {
+    this.loading = false;
   }
+}
 }

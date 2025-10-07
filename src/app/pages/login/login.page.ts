@@ -50,7 +50,7 @@ export class LoginPage implements OnInit {
       this.loading = true;
 
       try {
-        // ✅ NUEVO: Limpiar localStorage antes de login
+        // Limpiar localStorage antes de login
         localStorage.removeItem('empleado');
         localStorage.removeItem('nombreUsuario');
         localStorage.removeItem('userId');
@@ -70,7 +70,7 @@ export class LoginPage implements OnInit {
 
           console.log('Login exitoso:', result.empleado);
 
-          // ✅ NUEVO: Forzar recarga completa de la página
+          // Forzar recarga completa de la página
           window.location.href = '/tabs/tab1';
         }
       } catch (error: any) {
