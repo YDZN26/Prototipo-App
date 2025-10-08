@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar style="--background: #001E87; --color: white;">
     <ion-buttons slot="start">
-      <ion-button fill="clear" (click)="mostrarOpcionesUsuario($event)">
+      <ion-button fill="clear" (click)="mostrarOpcionesUsuario()">
         <ion-icon name="person-circle" slot="start" size="large"></ion-icon>
         <!-- Ocultar label en móvil, mostrar solo en tablet/desktop -->
         <ion-label class="user-label-desktop">{{ nombreUsuario }}</ion-label>
@@ -22,8 +22,6 @@
     </ion-buttons>
   </ion-toolbar>
 
-  <!-- Resto del HTML igual... -->
-
   <ion-toolbar *ngIf="mostrarCampoBusqueda" color="light">
     <ion-searchbar
       placeholder="Buscar ventas..."
@@ -35,24 +33,35 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="dashboard-content">
-  <!-- Sales Summary - FIJO -->
+  <!-- Sales Summary - FIJO con botón de reporte -->
   <div class="sales-summary-fixed">
-    <h3>{{ tituloResumen }}</h3>
+    <div class="summary-header">
+      <h3>{{ tituloResumen }}</h3>
+      <ion-button 
+        fill="clear" 
+        size="small" 
+        class="btn-reporte"
+        (click)="verReporteCompleto()">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        Reporte
+      </ion-button>
+    </div>
+    
     <div class="sales-row">
       <span>Efectivo:</span>
-      <span class="amount">{{ salesData.efectivo }} Bs.</span>
+      <span class="amount">{{ salesData.efectivo.toFixed(2) }} Bs.</span>
     </div>
     <div class="sales-row">
       <span>Transferencia:</span>
-      <span class="amount">{{ salesData.transferencia }} Bs.</span>
+      <span class="amount">{{ salesData.transferencia.toFixed(2) }} Bs.</span>
     </div>
     <div class="sales-row">
       <span>Tarjeta:</span>
-      <span class="amount">{{ salesData.tarjeta }} Bs.</span>
+      <span class="amount">{{ salesData.tarjeta.toFixed(2) }} Bs.</span>
     </div>
     <div class="sales-row total-row">
       <span>Total:</span>
-      <span class="amount">{{ salesData.total }} Bs.</span>
+      <span class="amount">{{ salesData.total.toFixed(2) }} Bs.</span>
     </div>
   </div>
 
@@ -71,7 +80,7 @@
       </ion-item>
 
       <!-- Mensaje cuando no hay ventas -->
-      <div *ngIf="filteredProducts.length === 0" class="no-ventas">
+      <div *ngIf="filteredProducts.length === 0 && !loading" class="no-ventas">
         <ion-icon name="calendar-outline" size="large"></ion-icon>
         <p>No hay ventas en este período</p>
       </div>

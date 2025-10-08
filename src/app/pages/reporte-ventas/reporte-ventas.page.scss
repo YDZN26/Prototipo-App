@@ -1,0 +1,339 @@
+.reporte-content {
+  --background: #f5f5f5;
+}
+
+.reporte-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+// ==================== ENCABEZADO ====================
+.reporte-header {
+  background: white;
+  padding: 30px 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #001E87;
+  }
+
+  .periodo {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2979FF;
+  }
+
+  .fecha-generacion {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+  }
+}
+
+// ==================== RESUMEN EJECUTIVO ====================
+.resumen-ejecutivo {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #2979FF;
+    padding-bottom: 10px;
+  }
+
+  .resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .resumen-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &.total {
+      background: linear-gradient(135deg, #2979FF 0%, #1565C0 100%);
+      color: white;
+      grid-column: 1 / -1;
+
+      .label, .valor {
+        color: white;
+      }
+
+      .valor {
+        font-size: 28px;
+      }
+    }
+
+    .label {
+      font-size: 13px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .valor {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+  }
+}
+
+// ==================== DETALLE DE VENTAS ====================
+.detalle-ventas {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #2979FF;
+    padding-bottom: 10px;
+  }
+
+  .venta-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid #2979FF;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .venta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #dee2e6;
+
+      .venta-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .venta-numero {
+          font-size: 16px;
+          font-weight: 700;
+          color: #001E87;
+        }
+
+        .venta-fecha {
+          font-size: 12px;
+          color: #666;
+        }
+      }
+
+      .venta-total {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2979FF;
+      }
+    }
+
+    .venta-detalles {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .detalle-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #555;
+
+        ion-icon {
+          font-size: 18px;
+          color: #2979FF;
+          flex-shrink: 0;
+        }
+
+        span {
+          flex: 1;
+        }
+      }
+    }
+
+    .productos-lista {
+      background: white;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+
+      .producto-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 14px;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .prod-cantidad {
+          font-weight: 600;
+          color: #2979FF;
+          min-width: 40px;
+        }
+
+        .prod-nombre {
+          flex: 1;
+          color: #333;
+        }
+
+        .prod-subtotal {
+          font-weight: 600;
+          color: #333;
+          min-width: 80px;
+          text-align: right;
+        }
+      }
+    }
+  }
+
+  .sin-ventas {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+
+    ion-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+}
+
+// ==================== LOADING ====================
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 15px;
+
+  ion-spinner {
+    width: 50px;
+    height: 50px;
+    color: #2979FF;
+  }
+
+  p {
+    color: #666;
+    font-size: 16px;
+  }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 768px) {
+  .reporte-container {
+    padding: 15px;
+  }
+
+  .reporte-header {
+    padding: 20px 15px;
+
+    h1 {
+      font-size: 22px;
+    }
+
+    .periodo {
+      font-size: 16px;
+    }
+  }
+
+  .resumen-ejecutivo,
+  .detalle-ventas {
+    padding: 15px;
+
+    h2 {
+      font-size: 18px;
+    }
+  }
+
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .venta-card {
+    .venta-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+
+      .venta-total {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+// ==================== ESTILOS PARA IMPRESIÓN ====================
+@media print {
+  ion-header,
+  ion-toolbar {
+    display: none !important;
+  }
+
+  .reporte-content {
+    --background: white;
+  }
+
+  .reporte-container {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .reporte-header,
+  .resumen-ejecutivo,
+  .detalle-ventas {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .venta-card {
+    page-break-inside: avoid;
+    margin-bottom: 10px;
+  }
+
+  // Ocultar elementos no necesarios en impresión
+  ion-button[slot="end"] {
+    display: none !important;
+  }
+}

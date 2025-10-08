@@ -94,7 +94,11 @@ const routes: Routes = [
     loadChildren: () => import('./pages/detalle-venta/detalle-venta.module').then(m => m.DetalleVentaPageModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['administrador', 'vendedor'] }
+  },  {
+    path: 'reporte-ventas',
+    loadChildren: () => import('./pages/reporte-ventas/reporte-ventas.module').then( m => m.ReporteVentasPageModule)
   }
+
 ];
 
 @NgModule({

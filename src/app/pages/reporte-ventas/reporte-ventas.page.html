@@ -1,0 +1,110 @@
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #001E87; --color: white;">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Reporte de Ventas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="imprimir()">
+        <ion-icon name="print-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="reporte-content">
+  <div class="reporte-container" *ngIf="!loading">
+    
+    <!-- Encabezado del reporte -->
+    <div class="reporte-header">
+      <h1>Reporte de Ventas</h1>
+      <p class="periodo">{{ tituloFecha }}</p>
+      <p class="fecha-generacion">
+        Generado: {{ fechaGeneracion }} - {{ horaGeneracion }}
+      </p>
+    </div>
+
+    <!-- Resumen ejecutivo -->
+    <div class="resumen-ejecutivo">
+      <h2>Resumen Ejecutivo</h2>
+      
+      <div class="resumen-grid">
+        <div class="resumen-item total">
+          <span class="label">Total Ventas:</span>
+          <span class="valor">{{ totalVentas.toFixed(2) }} Bs.</span>
+        </div>
+        
+        <div class="resumen-item">
+          <span class="label">Cantidad:</span>
+          <span class="valor">{{ cantidadVentas }}</span>
+        </div>
+        
+        <div class="resumen-item">
+          <span class="label">Efectivo:</span>
+          <span class="valor">{{ totalEfectivo.toFixed(2) }} Bs.</span>
+        </div>
+        
+        <div class="resumen-item">
+          <span class="label">Transferencia:</span>
+          <span class="valor">{{ totalTransferencia.toFixed(2) }} Bs.</span>
+        </div>
+        
+        <div class="resumen-item">
+          <span class="label">Tarjeta:</span>
+          <span class="valor">{{ totalTarjeta.toFixed(2) }} Bs.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalle de ventas -->
+    <div class="detalle-ventas">
+      <h2>Detalle de Ventas</h2>
+      
+      <div class="venta-card" *ngFor="let venta of ventas; let i = index">
+        <div class="venta-header">
+          <div class="venta-info">
+            <span class="venta-numero">#{{ venta.id }}</span>
+            <span class="venta-fecha">{{ venta.fecha }} - {{ venta.hora }}</span>
+          </div>
+          <span class="venta-total">{{ venta.total.toFixed(2) }} Bs.</span>
+        </div>
+        
+        <div class="venta-detalles">
+          <div class="detalle-row">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>{{ venta.cliente }}</span>
+          </div>
+          <div class="detalle-row">
+            <ion-icon name="card-outline"></ion-icon>
+            <span>{{ venta.metodoPago }}</span>
+          </div>
+          <div class="detalle-row">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>{{ venta.empleado }}</span>
+          </div>
+        </div>
+
+        <div class="productos-lista">
+          <div class="producto-item" *ngFor="let prod of venta.productos">
+            <span class="prod-cantidad">x{{ prod.cantidad }}</span>
+            <span class="prod-nombre">{{ prod.nombre }}</span>
+            <span class="prod-subtotal">{{ prod.subtotal.toFixed(2) }} Bs.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sin-ventas" *ngIf="ventas.length === 0">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <p>No hay ventas en este período</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner></ion-spinner>
+    <p>Cargando reporte...</p>
+  </div>
+</ion-content>

@@ -189,7 +189,11 @@ export class Tab1Page {
         finAmplio.toISOString()
       );
 
-      const ventasFiltradas = todasLasVentas.filter(venta => {
+      // Filtrar ventas según el rol del usuario
+      const userRole = localStorage.getItem('userRole');
+      const userId = parseInt(localStorage.getItem('userId') || '0');
+      
+      let ventasFiltradas = todasLasVentas.filter(venta => {
         const fechaVenta = new Date(venta.fecha);
         const diaVenta = fechaVenta.getDate();
         const mesVenta = fechaVenta.getMonth();
@@ -209,6 +213,14 @@ export class Tab1Page {
 
         return fechaVentaSinHora >= fechaInicioSinHora && fechaVentaSinHora <= fechaFinSinHora;
       });
+
+      //Si es vendedor, filtrar solo sus ventas
+      if (userRole === 'vendedor') {
+        ventasFiltradas = ventasFiltradas.filter(venta => venta.empleado_id === userId);
+        console.log(`Vendedor - Mostrando solo ventas del empleado ${userId}`);
+      } else {
+        console.log('👑 Administrador - Mostrando todas las ventas');
+      }
 
       console.log('Ventas cargadas:', ventasFiltradas.length);
 
@@ -271,7 +283,7 @@ export class Tab1Page {
       : 'Sin productos';
 
     //DEBUG: Ver empleado_id de cada venta
-    console.log(`🔍 Venta ${venta.id} - empleado_id:`, venta.empleado_id);
+    console.log(`Venta ${venta.id} - empleado_id:`, venta.empleado_id);
 
     return {
       id: venta.id,
@@ -335,28 +347,28 @@ export class Tab1Page {
     });
   }
 
-  async mostrarOpcionesUsuario(_event: any) {
-    const alert = await this.alertController.create({
-      header: this.nombreUsuario,
-      message: '¿Qué deseas hacer?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          cssClass: 'secondary'
-        },
-        {
-          text: 'Cerrar Sesión',
-          cssClass: 'danger',
-          handler: () => {
-            this.confirmarCerrarSesion();
-          }
+  async mostrarOpcionesUsuario() {
+  const alert = await this.alertController.create({
+    header: this.nombreUsuario,
+    message: '¿Qué deseas hacer?',
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Cerrar Sesión',
+        cssClass: 'danger',
+        handler: () => {
+          this.confirmarCerrarSesion();
         }
-      ]
-    });
+      }
+    ]
+  });
 
-    await alert.present();
-  }
+  await alert.present();
+}
 
   async confirmarCerrarSesion() {
     const alert = await this.alertController.create({
@@ -398,9 +410,24 @@ export class Tab1Page {
   }
 
   async ionViewWillEnter() {
-    console.log('🔄 ionViewWillEnter ejecutado en tab1');
+    console.log('ionViewWillEnter ejecutado en tab1');
     if (this.mostrandoHoy) {
       await this.cargarVentas();
     }
   }
+
+  verReporteCompleto() {
+  const userRole = localStorage.getItem('userRole');
+  const userId = parseInt(localStorage.getItem('userId') || '0');
+  
+  this.router.navigate(['/reporte-ventas'], {
+    queryParams: {
+      fechaInicio: this.fechaInicioActual.toISOString(),
+      fechaFin: this.fechaFinActual.toISOString(),
+      tituloFecha: this.tituloFecha,
+      userRole: userRole,
+      userId: userId
+    }
+  });
+}
 }
